@@ -1,0 +1,22 @@
+# SPDX-FileCopyrightText: 2026 Frans van Dorsselaer
+#
+# SPDX-License-Identifier: GPL-3.0-only
+
+# default: normalize EOL
+* text=auto
+
+.gitattributes   text
+.gitignore       text
+.editorconfig    text
+.json            text
+.license         text
+
+*.md    text
+*.txt   text
+*.yml   text
+
+*.slnx  text
+*.vcxproj   text
+*.c         text
+*.h         text
+*.inf       text eol=crlf

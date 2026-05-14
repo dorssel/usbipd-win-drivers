@@ -1,0 +1,10 @@
+# SPDX-FileCopyrightText: 2026 Frans van Dorsselaer
+#
+# SPDX-License-Identifier: GPL-3.0-only
+
+x64/
+ARM64/
+packages/
+.vs/
+.vscode/
+*.user

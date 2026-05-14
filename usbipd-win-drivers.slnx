@@ -1,0 +1,14 @@
+<Solution>
+  <Configurations>
+    <Platform Name="ARM64" />
+    <Platform Name="x64" />
+  </Configurations>
+  <Folder Name="/Solution Items/">
+    <File Path=".editorconfig" />
+    <File Path=".gitattributes" />
+    <File Path=".gitignore" />
+  </Folder>
+  <Project Path="UsbipdHubFilter/UsbipdHubFilter.vcxproj" Id="f2d3351b-cdd1-5327-05e1-ee3abcda3c6b">
+    <Deploy />
+  </Project>
+</Solution>
