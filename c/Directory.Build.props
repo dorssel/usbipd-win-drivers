@@ -1,0 +1,19 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<!--
+SPDX-FileCopyrightText: 2026 Frans van Dorsselaer
+
+SPDX-License-Identifier: GPL-3.0-only
+-->
+<Project>
+
+  <Import Project="$([MSBuild]::GetPathOfFileAbove('Directory.Build.props', '$(MSBuildThisFileDirectory)..\'))" />
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Windows.SDK.CPP" />
+    <PackageReference Include="Microsoft.Windows.SDK.CPP.arm64" ExcludeAssets="build" />
+    <PackageReference Include="Microsoft.Windows.SDK.CPP.x64" ExcludeAssets="build" />
+    <PackageReference Include="Microsoft.Windows.WDK.ARM64" ExcludeAssets="build" />
+    <PackageReference Include="Microsoft.Windows.WDK.x64" ExcludeAssets="build" />
+  </ItemGroup>
+
+</Project>

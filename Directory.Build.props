@@ -1,0 +1,31 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<!--
+SPDX-FileCopyrightText: 2026 Frans van Dorsselaer
+
+SPDX-License-Identifier: GPL-3.0-only
+-->
+<Project>
+
+  <PropertyGroup>
+    <ContinuousIntegrationBuild Condition="'$(GITHUB_ACTIONS)' == 'true'">true</ContinuousIntegrationBuild>
+    <ContinuousIntegrationBuild Condition="'$(ContinuousIntegrationBuild)' != 'true'">false</ContinuousIntegrationBuild>
+
+    <!-- Be very strict -->
+    <NuGetAudit>true</NuGetAudit>
+    <NuGetAuditLevel>low</NuGetAuditLevel>
+    <NuGetAuditMode>all</NuGetAuditMode>
+
+    <!-- Common defaults -->
+    <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
+    <CentralPackageTransitivePinningEnabled>true</CentralPackageTransitivePinningEnabled>
+
+    <!-- Deterministic builds -->
+    <RestorePackagesWithLockFile>true</RestorePackagesWithLockFile>
+    <RestoreLockedMode Condition="$(ContinuousIntegrationBuild)">true</RestoreLockedMode>
+
+    <!-- Assembly metadata -->
+    <Product>usbipd-win-drivers</Product>
+    <Company>Frans van Dorsselaer</Company>
+  </PropertyGroup>
+
+</Project>

@@ -11,13 +11,17 @@
 .json            text
 .license         text
 
+*.json  text
 *.md    text
 *.txt   text
 *.yml   text
 
-packages.config     text
+nuget.config    text
 
 *.slnx  text
+*.props     text
+*.targets   text
+
 *.vcxproj   text
 *.vcxproj.filters   text
 *.c         text
@@ -27,5 +31,3 @@ packages.config     text
 *.csproj    text
 *.cs        text eol=crlf
 *.tt        text
-*.props     text
-*.targets   text
