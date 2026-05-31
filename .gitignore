@@ -2,9 +2,14 @@
 #
 # SPDX-License-Identifier: GPL-3.0-only
 
-x64/
 ARM64/
+bin/
+generated/
+obj/
 packages/
+x64/
 .vs/
 .vscode/
+*.aps
 *.user
+launchSettings.json

@@ -1,5 +1,6 @@
 <Solution>
   <Configurations>
+    <Platform Name="Any CPU" />
     <Platform Name="ARM64" />
     <Platform Name="x64" />
   </Configurations>
@@ -8,7 +9,13 @@
     <File Path=".gitattributes" />
     <File Path=".gitignore" />
   </Folder>
-  <Project Path="UsbipdHubFilter/UsbipdHubFilter.vcxproj" Id="f2d3351b-cdd1-5327-05e1-ee3abcda3c6b">
+  <Project Path="UsbipdHubFilter/UsbipdHubFilter.vcxproj" Id="6dd555da-b802-7673-fd9b-f43df1c8e6dd">
+    <BuildDependency Project="VersionHelper/VersionHelper.csproj" />
     <Deploy />
   </Project>
+  <Project Path="UsbipdStub/UsbipdStub.vcxproj" Id="f2d3351b-cdd1-5327-05e1-ee3abcda3c6b">
+    <BuildDependency Project="VersionHelper/VersionHelper.csproj" />
+    <Deploy />
+  </Project>
+  <Project Path="VersionHelper/VersionHelper.csproj" Id="4feb2be1-a254-474f-aed0-0368e2407c95" />
 </Solution>
