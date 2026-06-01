@@ -136,6 +136,9 @@
       <Command>"$(ProjectDir)..\VersionHelper\bin\$(Configuration)\net10.0\VersionHelper.exe" "$(TargetFileName)" "USB/IP Hub Filter Driver" "$(ProjectDir)\generated\version.rc"</Command>
       <Message>Generating version resource</Message>
     </PreBuildEvent>
+    <Link>
+      <AdditionalOptions>/PDBALTPATH:%_PDB% %(AdditionalOptions)</AdditionalOptions>
+    </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
@@ -158,6 +161,9 @@
       <Command>"$(ProjectDir)..\VersionHelper\bin\$(Configuration)\net10.0\VersionHelper.exe" "$(TargetFileName)" "USB/IP Hub Filter Driver" "$(ProjectDir)\generated\version.rc"</Command>
       <Message>Generating version resource</Message>
     </PreBuildEvent>
+    <Link>
+      <AdditionalOptions>/PDBALTPATH:%_PDB% %(AdditionalOptions)</AdditionalOptions>
+    </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|ARM64'">
     <ClCompile>
@@ -180,6 +186,9 @@
       <Command>"$(ProjectDir)..\VersionHelper\bin\$(Configuration)\net10.0\VersionHelper.exe" "$(TargetFileName)" "USB/IP Hub Filter Driver" "$(ProjectDir)\generated\version.rc"</Command>
       <Message>Generating version resource</Message>
     </PreBuildEvent>
+    <Link>
+      <AdditionalOptions>/PDBALTPATH:%_PDB% %(AdditionalOptions)</AdditionalOptions>
+    </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|ARM64'">
     <ClCompile>
@@ -202,6 +211,9 @@
       <Command>"$(ProjectDir)..\VersionHelper\bin\$(Configuration)\net10.0\VersionHelper.exe" "$(TargetFileName)" "USB/IP Hub Filter Driver" "$(ProjectDir)\generated\version.rc"</Command>
       <Message>Generating version resource</Message>
     </PreBuildEvent>
+    <Link>
+      <AdditionalOptions>/PDBALTPATH:%_PDB% %(AdditionalOptions)</AdditionalOptions>
+    </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
     <FilesToPackage Include="$(TargetPath)" />
