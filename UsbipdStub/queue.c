@@ -5,16 +5,17 @@
 #include "queue.tmh"
 
 #ifdef ALLOC_PRAGMA
-#pragma alloc_text (PAGE, UsbipdHubFilterQueueInitialize)
+#pragma alloc_text (PAGE, UsbipdStubQueueInitialize)
 #endif
 
 NTSTATUS
-UsbipdHubFilterQueueInitialize(
+UsbipdStubQueueInitialize(
     _In_ WDFDEVICE Device
     )
 /*++
 
 Routine Description:
+
 
      The I/O dispatch callbacks for the frameworks device object
      are configured in this function.
@@ -35,10 +36,10 @@ Return Value:
 {
     WDFQUEUE queue;
     NTSTATUS status;
-    WDF_IO_QUEUE_CONFIG queueConfig;
+    WDF_IO_QUEUE_CONFIG    queueConfig;
 
     PAGED_CODE();
-
+    
     //
     // Configure a default queue so that requests that are not
     // configure-forwarded using WdfDeviceConfigureRequestDispatching to go to
@@ -49,8 +50,8 @@ Return Value:
         WdfIoQueueDispatchParallel
         );
 
-    queueConfig.EvtIoDeviceControl = UsbipdHubFilterEvtIoDeviceControl;
-    queueConfig.EvtIoStop = UsbipdHubFilterEvtIoStop;
+    queueConfig.EvtIoDeviceControl = UsbipdStubEvtIoDeviceControl;
+    queueConfig.EvtIoStop = UsbipdStubEvtIoStop;
 
     status = WdfIoQueueCreate(
                  Device,
@@ -59,7 +60,7 @@ Return Value:
                  &queue
                  );
 
-    if(!NT_SUCCESS(status)) {
+    if( !NT_SUCCESS(status) ) {
         TraceEvents(TRACE_LEVEL_ERROR, TRACE_QUEUE, "WdfIoQueueCreate failed %!STATUS!", status);
         return status;
     }
@@ -68,7 +69,7 @@ Return Value:
 }
 
 VOID
-UsbipdHubFilterEvtIoDeviceControl(
+UsbipdStubEvtIoDeviceControl(
     _In_ WDFQUEUE Queue,
     _In_ WDFREQUEST Request,
     _In_ size_t OutputBufferLength,
@@ -111,7 +112,7 @@ Return Value:
 }
 
 VOID
-UsbipdHubFilterEvtIoStop(
+UsbipdStubEvtIoStop(
     _In_ WDFQUEUE Queue,
     _In_ WDFREQUEST Request,
     _In_ ULONG ActionFlags
@@ -150,36 +151,22 @@ Return Value:
     //
     // Typically, the driver uses the following rules:
     //
-    // - If the driver owns the I/O request, it calls WdfRequestUnmarkCancelable
-    //   (if the request is cancelable) and either calls WdfRequestStopAcknowledge
-    //   with a Requeue value of TRUE, or it calls WdfRequestComplete with a
-    //   completion status value of STATUS_SUCCESS or STATUS_CANCELLED.
-    //
-    //   Before it can call these methods safely, the driver must make sure that
-    //   its implementation of EvtIoStop has exclusive access to the request.
-    //
-    //   In order to do that, the driver must synchronize access to the request
-    //   to prevent other threads from manipulating the request concurrently.
-    //   The synchronization method you choose will depend on your driver's design.
-    //
-    //   For example, if the request is held in a shared context, the EvtIoStop callback
-    //   might acquire an internal driver lock, take the request from the shared context,
-    //   and then release the lock. At this point, the EvtIoStop callback owns the request
-    //   and can safely complete or requeue the request.
+    // - If the driver owns the I/O request, it either postpones further processing
+    //   of the request and calls WdfRequestStopAcknowledge, or it calls WdfRequestComplete
+    //   with a completion status value of STATUS_SUCCESS or STATUS_CANCELLED.
+    //  
+    //   The driver must call WdfRequestComplete only once, to either complete or cancel
+    //   the request. To ensure that another thread does not call WdfRequestComplete
+    //   for the same request, the EvtIoStop callback must synchronize with the driver's
+    //   other event callback functions, for instance by using interlocked operations.
     //
     // - If the driver has forwarded the I/O request to an I/O target, it either calls
     //   WdfRequestCancelSentRequest to attempt to cancel the request, or it postpones
-    //   further processing of the request and calls WdfRequestStopAcknowledge with
-    //   a Requeue value of FALSE.
+    //   further processing of the request and calls WdfRequestStopAcknowledge.
     //
     // A driver might choose to take no action in EvtIoStop for requests that are
-    // guaranteed to complete in a small amount of time.
-    //
-    // In this case, the framework waits until the specified request is complete
-    // before moving the device (or system) to a lower power state or removing the device.
-    // Potentially, this inaction can prevent a system from entering its hibernation state
-    // or another low system power state. In extreme cases, it can cause the system
-    // to crash with bugcheck code 9F.
+    // guaranteed to complete in a small amount of time. For example, the driver might
+    // take no action for requests that are completed in one of the driver’s request handlers.
     //
 
     return;

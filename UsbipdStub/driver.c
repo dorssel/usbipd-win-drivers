@@ -8,8 +8,8 @@
 
 #ifdef ALLOC_PRAGMA
 #pragma alloc_text (INIT, DriverEntry)
-#pragma alloc_text (PAGE, UsbipdHubFilterEvtDeviceAdd)
-#pragma alloc_text (PAGE, UsbipdHubFilterEvtDriverContextCleanup)
+#pragma alloc_text (PAGE, UsbipdStubEvtDeviceAdd)
+#pragma alloc_text (PAGE, UsbipdStubEvtDriverContextCleanup)
 #endif
 
 
@@ -51,7 +51,7 @@ Return Value:
     //
     // Initialize WPP Tracing
     //
-    WPP_INIT_TRACING(DriverObject, RegistryPath);
+    WPP_INIT_TRACING( DriverObject, RegistryPath );
 
     TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_DRIVER, "%!FUNC! Entry");
 
@@ -60,10 +60,10 @@ Return Value:
     // the framework driver object is deleted during driver unload.
     //
     WDF_OBJECT_ATTRIBUTES_INIT(&attributes);
-    attributes.EvtCleanupCallback = UsbipdHubFilterEvtDriverContextCleanup;
+    attributes.EvtCleanupCallback = UsbipdStubEvtDriverContextCleanup;
 
     WDF_DRIVER_CONFIG_INIT(&config,
-                           UsbipdHubFilterEvtDeviceAdd
+                           UsbipdStubEvtDeviceAdd
                            );
 
     status = WdfDriverCreate(DriverObject,
@@ -85,7 +85,7 @@ Return Value:
 }
 
 NTSTATUS
-UsbipdHubFilterEvtDeviceAdd(
+UsbipdStubEvtDeviceAdd(
     _In_    WDFDRIVER       Driver,
     _Inout_ PWDFDEVICE_INIT DeviceInit
     )
@@ -116,7 +116,7 @@ Return Value:
 
     TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_DRIVER, "%!FUNC! Entry");
 
-    status = UsbipdHubFilterCreateDevice(DeviceInit);
+    status = UsbipdStubCreateDevice(DeviceInit);
 
     TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_DRIVER, "%!FUNC! Exit");
 
@@ -124,7 +124,7 @@ Return Value:
 }
 
 VOID
-UsbipdHubFilterEvtDriverContextCleanup(
+UsbipdStubEvtDriverContextCleanup(
     _In_ WDFOBJECT DriverObject
     )
 /*++
@@ -144,12 +144,13 @@ Return Value:
 {
     UNREFERENCED_PARAMETER(DriverObject);
 
-    PAGED_CODE();
+    PAGED_CODE ();
 
     TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_DRIVER, "%!FUNC! Entry");
 
     //
     // Stop WPP Tracing
     //
-    WPP_CLEANUP(WdfDriverWdmGetDriverObject((WDFDRIVER)DriverObject));
+    WPP_CLEANUP( WdfDriverWdmGetDriverObject( (WDFDRIVER) DriverObject) );
+
 }

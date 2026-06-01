@@ -15,8 +15,17 @@
 *.txt   text
 *.yml   text
 
+packages.config     text
+
 *.slnx  text
 *.vcxproj   text
+*.vcxproj.filters   text
 *.c         text
 *.h         text
 *.inf       text eol=crlf
+
+*.csproj    text
+*.cs        text eol=crlf
+*.tt        text
+*.props     text
+*.targets   text

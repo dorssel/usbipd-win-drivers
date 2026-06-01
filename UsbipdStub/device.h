@@ -6,8 +6,9 @@
 // The device context performs the same job as
 // a WDM device extension in the driver frameworks
 //
-typedef struct _DEVICE_CONTEXT
+typedef struct
 {
+    WDFUSBDEVICE UsbDevice;
     ULONG PrivateDeviceData;  // just a placeholder
 
 } DEVICE_CONTEXT, *PDEVICE_CONTEXT;
@@ -20,9 +21,15 @@ typedef struct _DEVICE_CONTEXT
 WDF_DECLARE_CONTEXT_TYPE_WITH_NAME(DEVICE_CONTEXT, DeviceGetContext)
 
 //
-// Function to initialize the device and its callbacks
+// Function to initialize the device's queues and callbacks
 //
 NTSTATUS
-UsbipdHubFilterCreateDevice(
+UsbipdStubCreateDevice(
     _Inout_ PWDFDEVICE_INIT DeviceInit
     );
+
+//
+// Function to select the device's USB configuration and get a WDFUSBDEVICE
+// handle
+//
+EVT_WDF_DEVICE_PREPARE_HARDWARE UsbipdStubEvtDevicePrepareHardware;

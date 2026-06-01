@@ -5,12 +5,12 @@
 //
 // Define the tracing flags.
 //
-// Tracing GUID - b4829bf1-3240-4fec-8da3-33acc7178415
+// Tracing GUID - 5213faf2-3c3f-4f57-a4b0-33fad8a5bde2
 //
 
 #define WPP_CONTROL_GUIDS                                              \
     WPP_DEFINE_CONTROL_GUID(                                           \
-        UsbipdHubFilterTraceGuid, (b4829bf1,3240,4fec,8da3,33acc7178415), \
+        UsbipdStubTraceGuid, (5213faf2,3c3f,4f57,a4b0,33fad8a5bde2), \
                                                                             \
         WPP_DEFINE_BIT(MYDRIVER_ALL_INFO)                              \
         WPP_DEFINE_BIT(TRACE_DRIVER)                                   \
@@ -30,7 +30,7 @@
                
 #define WPP_LEVEL_FLAGS_ENABLED(lvl, flags) \
            (WPP_LEVEL_ENABLED(flags) && WPP_CONTROL(WPP_BIT_ ## flags).Level >= lvl)
-
+           
 //           
 // WPP orders static parameters before dynamic parameters. To support the Trace function
 // defined below which sets FLAGS=MYDRIVER_ALL_INFO, a custom macro must be defined to
