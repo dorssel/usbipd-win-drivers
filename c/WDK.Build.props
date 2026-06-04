@@ -6,13 +6,9 @@ SPDX-License-Identifier: GPL-3.0-only
 -->
 <Project>
 
-  <PropertyGroup>
-    <SdkWdkVersion>10.0.28000.1839</SdkWdkVersion>
-  </PropertyGroup>
-  
-  <Import Project="$(NuGetPackageRoot)microsoft.windows.sdk.cpp.arm64\$(SdkWdkVersion)\build\native\Microsoft.Windows.SDK.cpp.arm64.props" Condition="'$(Platform)' == 'arm64' And Exists('$(NuGetPackageRoot)microsoft.windows.sdk.cpp.arm64\$(SdkWdkVersion)\build\native\Microsoft.Windows.SDK.cpp.arm64.props')" />
-  <Import Project="$(NuGetPackageRoot)microsoft.windows.sdk.cpp.x64\$(SdkWdkVersion)\build\native\Microsoft.Windows.SDK.cpp.x64.props" Condition="'$(Platform)' == 'x64' And Exists('$(NuGetPackageRoot)microsoft.windows.sdk.cpp.x64\$(SdkWdkVersion)\build\native\Microsoft.Windows.SDK.cpp.x64.props')" />
-  <Import Project="$(NuGetPackageRoot)microsoft.windows.wdk.arm64\$(SdkWdkVersion)\build\native\Microsoft.Windows.WDK.arm64.props" Condition="'$(Platform)' == 'arm64' And Exists('$(NuGetPackageRoot)microsoft.windows.wdk.arm64\$(SdkWdkVersion)\build\native\Microsoft.Windows.WDK.arm64.props')" />
-  <Import Project="$(NuGetPackageRoot)microsoft.windows.wdk.x64\$(SdkWdkVersion)\build\native\Microsoft.Windows.WDK.x64.props" Condition="'$(Platform)' == 'x64' And Exists('$(NuGetPackageRoot)microsoft.windows.wdk.x64\$(SdkWdkVersion)\build\native\Microsoft.Windows.WDK.x64.props')" />
+  <Import Project="$(PkgMicrosoft_Windows_SDK_CPP_arm64)\build\native\Microsoft.Windows.SDK.cpp.arm64.props" Condition="'$(Platform)' == 'arm64' And Exists('$(PkgMicrosoft_Windows_SDK_CPP_arm64)\build\native\Microsoft.Windows.SDK.cpp.arm64.props')" />
+  <Import Project="$(PkgMicrosoft_Windows_SDK_CPP_x64)\build\native\Microsoft.Windows.SDK.cpp.x64.props" Condition="'$(Platform)' == 'x64' And Exists('$(PkgMicrosoft_Windows_SDK_CPP_x64)\build\native\Microsoft.Windows.SDK.cpp.x64.props')" />
+  <Import Project="$(PkgMicrosoft_Windows_WDK_ARM64)\build\native\Microsoft.Windows.WDK.arm64.props" Condition="'$(Platform)' == 'arm64' And Exists('$(PkgMicrosoft_Windows_WDK_ARM64)\build\native\Microsoft.Windows.WDK.arm64.props')" />
+  <Import Project="$(PkgMicrosoft_Windows_WDK_x64)\build\native\Microsoft.Windows.WDK.x64.props" Condition="'$(Platform)' == 'x64' And Exists('$(PkgMicrosoft_Windows_WDK_x64)\build\native\Microsoft.Windows.WDK.x64.props')" />
 
 </Project>
