@@ -10,10 +10,10 @@ SPDX-License-Identifier: GPL-3.0-only
 
   <ItemGroup>
     <PackageReference Include="Microsoft.Windows.SDK.CPP" />
-    <PackageReference Include="Microsoft.Windows.SDK.CPP.arm64" ExcludeAssets="build" />
-    <PackageReference Include="Microsoft.Windows.SDK.CPP.x64" ExcludeAssets="build" />
-    <PackageReference Include="Microsoft.Windows.WDK.ARM64" ExcludeAssets="build" />
-    <PackageReference Include="Microsoft.Windows.WDK.x64" ExcludeAssets="build" />
+    <PackageReference Include="Microsoft.Windows.SDK.CPP.arm64" ExcludeAssets="build" GeneratePathProperty="true" />
+    <PackageReference Include="Microsoft.Windows.SDK.CPP.x64" ExcludeAssets="build" GeneratePathProperty="true" />
+    <PackageReference Include="Microsoft.Windows.WDK.ARM64" ExcludeAssets="build" GeneratePathProperty="true" />
+    <PackageReference Include="Microsoft.Windows.WDK.x64" ExcludeAssets="build" GeneratePathProperty="true" />
   </ItemGroup>
 
 </Project>
