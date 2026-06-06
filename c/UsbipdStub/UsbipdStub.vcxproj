@@ -238,5 +238,8 @@ SPDX-License-Identifier: GPL-3.0-only
   <ItemGroup>
     <ResourceCompile Include="generated\version.rc" />
   </ItemGroup>
+  <ItemGroup>
+    <None Include="cpp.hint" />
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
 </Project>

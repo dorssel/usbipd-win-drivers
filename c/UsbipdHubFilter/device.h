@@ -6,6 +6,7 @@
 
 #include "stdafx.h"
 
+
 //
 // The device context performs the same job as
 // a WDM device extension in the driver frameworks
@@ -26,7 +27,4 @@ WDF_DECLARE_CONTEXT_TYPE_WITH_NAME(DEVICE_CONTEXT, DeviceGetContext)
 //
 // Function to initialize the device and its callbacks
 //
-NTSTATUS
-UsbipdHubFilterCreateDevice(
-    _Inout_ PWDFDEVICE_INIT DeviceInit
-    );
+NTSTATUS UsbipdHubFilterCreateDevice(_Inout_ PWDFDEVICE_INIT DeviceInit);
