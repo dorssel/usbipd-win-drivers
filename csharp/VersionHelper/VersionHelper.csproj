@@ -15,6 +15,18 @@ SPDX-License-Identifier: GPL-3.0-only
   </ItemGroup>
 
   <ItemGroup>
+    <!--
+    This makes Visual Studio and Dependabot recognize these dependencies that really are for the C projects.
+    It allows us to use PackageReference in the C projects, even though that is not officially supported.
+    -->
+    <PackageReference Include="Microsoft.Windows.SDK.CPP" ExcludeAssets="all" />
+    <PackageReference Include="Microsoft.Windows.SDK.CPP.arm64" ExcludeAssets="all" />
+    <PackageReference Include="Microsoft.Windows.SDK.CPP.x64" ExcludeAssets="all" />
+    <PackageReference Include="Microsoft.Windows.WDK.ARM64" ExcludeAssets="all" />
+    <PackageReference Include="Microsoft.Windows.WDK.x64" ExcludeAssets="all" />
+  </ItemGroup>
+
+  <ItemGroup>
     <None Update="VersionInfo.tt">
       <Generator>TextTemplatingFilePreprocessor</Generator>
       <LastGenOutput>VersionInfo.cs</LastGenOutput>
