@@ -1,7 +1,3 @@
-;
-; UsbipdHubFilter.inf
-;
-
 [Version]
 Signature   = "$WINDOWS NT$"
 Class       = Extension
@@ -9,7 +5,7 @@ ClassGuid   = {e2f84ce7-8efa-411c-aa69-97454ca4cb57}
 Provider    = %ManufacturerName%
 ExtensionId = {d1f2707a-23be-4472-8641-e9245d101f6c}
 CatalogFile = UsbipdHubFilter.cat
-DriverVer   = ; TODO: set DriverVer in stampinf property pages
+DriverVer   = ; NOTE: Automatically set by stampinf
 PnpLockdown = 1
 
 [DestinationDirs]
@@ -19,35 +15,31 @@ DefaultDestDir = 13
 1 = %DiskName%,,,""
 
 [SourceDisksFiles]
-UsbipdHubFilter.sys  = 1,,
-
-;*****************************************
-; Install Section
-;*****************************************
+UsbipdHubFilter.sys = 1,,
 
 [Manufacturer]
-%ManufacturerName% = UsbipdHubFilter,NT$ARCH$.10.0...16299
+%ManufacturerName% = UsbipdHubFilter,nt$ARCH$.10.0...16299
 
-[UsbipdHubFilter.NT$ARCH$.10.0...16299]
-%UsbipdHubFilter.DeviceDescription% = UsbipdHubFilter_Install,USB\VID_0409&PID_005A&REV_0100
+[UsbipdHubFilter.nt$ARCH$.10.0...16299]
+%DeviceDescription% = UsbipdHubFilter_Install,USB\VID_0409&PID_005A&REV_0100
 
-[UsbipdHubFilter_Install.NT]
+[UsbipdHubFilter_Install.nt$ARCH$]
 CopyFiles = UsbipdHubFilter_Install_Files
 
 [UsbipdHubFilter_Install_Files]
 UsbipdHubFilter.sys
 
-[UsbipdHubFilter_Install.NT.Services]
+[UsbipdHubFilter_Install.nt$ARCH$.Services]
 AddService = UsbipdHubFilter,,UsbipdHubFilter_Install_Service
 
 [UsbipdHubFilter_Install_Service]
-DisplayName    = %UsbipdHubFilter.ServiceDescription%
+DisplayName    = %ServiceDescription%
 ServiceType    = 1 ; SERVICE_KERNEL_DRIVER
 StartType      = 3 ; SERVICE_DEMAND_START
 ErrorControl   = 1 ; SERVICE_ERROR_NORMAL
 ServiceBinary  = %13%\UsbipdHubFilter.sys
 
-[UsbipdHubFilter_Install.NT.Wdf]
+[UsbipdHubFilter_Install.nt$ARCH$.Wdf]
 KmdfService = UsbipdHubFilter,UsbipdHubFilter_Install_Wdf
 
 [UsbipdHubFilter_Install_Wdf]
@@ -56,5 +48,5 @@ KmdfLibraryVersion = $KMDFVERSION$
 [Strings]
 ManufacturerName = "Frans van Dorsselaer"
 DiskName = "UsbipdHubFilter Installation Disk"
-UsbipdHubFilter.DeviceDescription = "UsbipdHubFilter Device"
-UsbipdHubFilter.ServiceDescription = "UsbipdHubFilter Service"
+DeviceDescription = "UsbipdHubFilter Device"
+ServiceDescription = "UsbipdHubFilter Service"

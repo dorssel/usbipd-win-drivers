@@ -1,4 +1,8 @@
-﻿using System.Text;
+﻿// SPDX-FileCopyrightText: 2026 Frans van Dorsselaer
+//
+// SPDX-License-Identifier: GPL-3.0-only
+
+using System.Text;
 using VersionHelper;
 
 if (args.Length != 3)
