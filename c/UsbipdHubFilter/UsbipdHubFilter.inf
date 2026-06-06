@@ -17,10 +17,12 @@ DefaultDestDir = 13
 [SourceDisksFiles]
 UsbipdHubFilter.sys = 1,,
 
-[Manufacturer]
-%ManufacturerName% = UsbipdHubFilter,nt$ARCH$.10.0...16299
+; NOTE: We still support Windows Server 2019 (build 17763).
 
-[UsbipdHubFilter.nt$ARCH$.10.0...16299]
+[Manufacturer]
+%ManufacturerName% = UsbipdHubFilter,nt$ARCH$.10.0...17763
+
+[UsbipdHubFilter.nt$ARCH$.10.0...17763]
 %DeviceDescription% = UsbipdHubFilter_Install,USB\VID_0409&PID_005A&REV_0100
 
 [UsbipdHubFilter_Install.nt$ARCH$]
@@ -44,6 +46,14 @@ KmdfService = UsbipdHubFilter,UsbipdHubFilter_Install_Wdf
 
 [UsbipdHubFilter_Install_Wdf]
 KmdfLibraryVersion = $KMDFVERSION$
+
+; NOTE: Modern declarative AddFilter requires Windows >= 1903.
+
+[UsbipdHubFilter_Install.nt$ARCH$.HW]
+AddReg=UsbipdHubFilter_Install_Registry
+
+[UsbipdHubFilter_Install_Registry]
+HKR,,"UpperFilters",0x00010008,"UsbipdHubFilter"
 
 [Strings]
 ManufacturerName = "Frans van Dorsselaer"

@@ -18,6 +18,7 @@ SPDX-License-Identifier: GPL-3.0-only
     <File Path="nuget.config" />
   </Folder>
   <Folder Name="/Solution Items/c/">
+    <File Path="c/.editorconfig" />
     <File Path="c/Directory.Build.props" />
     <File Path="c/WDK.Build.props" />
   </Folder>

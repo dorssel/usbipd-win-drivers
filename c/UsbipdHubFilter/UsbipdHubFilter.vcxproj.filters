@@ -38,13 +38,16 @@ SPDX-License-Identifier: GPL-3.0-only
     <ClInclude Include="public.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="queue.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="trace.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="stdafx.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="control_device.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="control_queue.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -55,10 +58,13 @@ SPDX-License-Identifier: GPL-3.0-only
     <ClCompile Include="driver.c">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="queue.c">
+    <ClCompile Include="stdafx.c">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="stdafx.c">
+    <ClCompile Include="control_device.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="control_queue.c">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
