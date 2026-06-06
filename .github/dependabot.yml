@@ -1,0 +1,27 @@
+# SPDX-FileCopyrightText: 2026 Frans van Dorsselaer
+#
+# SPDX-License-Identifier: GPL-3.0-only
+
+---
+# yaml-language-server: $schema=https://json.schemastore.org/dependabot-2.0.json
+
+version: 2
+updates:
+  - package-ecosystem: 'github-actions'
+    directory: '/'
+    schedule:
+      interval: 'daily'
+  - package-ecosystem: 'dotnet-sdk'
+    directory: '/'
+    schedule:
+      interval: 'weekly'
+      day: 'wednesday'
+  - package-ecosystem: 'nuget'
+    directory: '/'
+    schedule:
+      interval: 'daily'
+    groups:
+      WDK:
+        patterns:
+          - 'Microsoft.Windows.SDK.*'
+          - 'Microsoft.Windows.WDK.*'
