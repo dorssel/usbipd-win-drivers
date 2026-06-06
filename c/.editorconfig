@@ -1,0 +1,6 @@
+# SPDX-FileCopyrightText: 2026 Frans van Dorsselaer
+#
+# SPDX-License-Identifier: GPL-3.0-only
+
+[*]
+cpp_include_cleanup_excluded_files = crtdefs.h,evntrace.h,ntdef.h,ntstatus.h,sal.h,trace.h,usbdlib.h,wdfdevice.h,wdfdriver.h,wdfio.h,wdfobject.h,wdftypes.h,wdfrequest.h,wdfusb.h,wdm.h,windows.h

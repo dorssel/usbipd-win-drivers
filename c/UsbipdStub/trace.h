@@ -6,12 +6,12 @@
 
 #include "stdafx.h"
 
+
 //
 // Define the tracing flags.
 //
 // Tracing GUID - 5213faf2-3c3f-4f57-a4b0-33fad8a5bde2
 //
-
 #define WPP_CONTROL_GUIDS                                              \
     WPP_DEFINE_CONTROL_GUID(                                           \
         UsbipdStubTraceGuid, (5213faf2,3c3f,4f57,a4b0,33fad8a5bde2), \

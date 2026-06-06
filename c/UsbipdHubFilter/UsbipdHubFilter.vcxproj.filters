@@ -67,4 +67,7 @@ SPDX-License-Identifier: GPL-3.0-only
       <Filter>Resource Files</Filter>
     </ResourceCompile>
   </ItemGroup>
+  <ItemGroup>
+    <None Include="cpp.hint" />
+  </ItemGroup>
 </Project>

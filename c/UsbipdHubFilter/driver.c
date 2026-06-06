@@ -10,18 +10,74 @@
 
 #include "device.h"
 
-#ifdef ALLOC_PRAGMA
-#pragma alloc_text (INIT, DriverEntry)
+
+static EVT_WDF_DRIVER_DEVICE_ADD UsbipdHubFilterEvtDeviceAdd;
 #pragma alloc_text (PAGE, UsbipdHubFilterEvtDeviceAdd)
+static NTSTATUS UsbipdHubFilterEvtDeviceAdd(_In_ WDFDRIVER Driver, _Inout_ PWDFDEVICE_INIT DeviceInit)
+/*++
+Routine Description:
+
+    EvtDeviceAdd is called by the framework in response to AddDevice
+    call from the PnP manager. We create and initialize a device object to
+    represent a new instance of the device.
+
+Arguments:
+
+    Driver - Handle to a framework driver object created in DriverEntry
+
+    DeviceInit - Pointer to a framework-allocated WDFDEVICE_INIT structure.
+
+Return Value:
+
+    NTSTATUS
+
+--*/
+{
+    NTSTATUS status;
+
+    UNREFERENCED_PARAMETER(Driver);
+
+    PAGED_CODE();
+
+    TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_DRIVER, "%!FUNC! Entry");
+
+    status = UsbipdHubFilterCreateDevice(DeviceInit);
+
+    TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_DRIVER, "%!FUNC! Exit");
+
+    return status;
+}
+
+
+static EVT_WDF_OBJECT_CONTEXT_CLEANUP UsbipdHubFilterEvtDriverContextCleanup;
 #pragma alloc_text (PAGE, UsbipdHubFilterEvtDriverContextCleanup)
-#endif
+static void UsbipdHubFilterEvtDriverContextCleanup(_In_ WDFOBJECT DriverObject)
+/*++
+Routine Description:
+
+    Free all the resources allocated in DriverEntry.
+
+Arguments:
+
+    DriverObject - handle to a WDF Driver object.
+
+--*/
+{
+    UNREFERENCED_PARAMETER(DriverObject);
+
+    PAGED_CODE();
+
+    TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_DRIVER, "%!FUNC! Entry");
+
+    //
+    // Stop WPP Tracing
+    //
+    WPP_CLEANUP(WdfDriverWdmGetDriverObject((WDFDRIVER)DriverObject));
+}
 
 
-NTSTATUS
-DriverEntry(
-    _In_ PDRIVER_OBJECT  DriverObject,
-    _In_ PUNICODE_STRING RegistryPath
-    )
+#pragma alloc_text (INIT, DriverEntry)
+NTSTATUS DriverEntry(_In_ PDRIVER_OBJECT DriverObject, _In_ PUNICODE_STRING RegistryPath)
 /*++
 
 Routine Description:
@@ -67,15 +123,15 @@ Return Value:
     attributes.EvtCleanupCallback = UsbipdHubFilterEvtDriverContextCleanup;
 
     WDF_DRIVER_CONFIG_INIT(&config,
-                           UsbipdHubFilterEvtDeviceAdd
-                           );
+        UsbipdHubFilterEvtDeviceAdd
+    );
 
     status = WdfDriverCreate(DriverObject,
-                             RegistryPath,
-                             &attributes,
-                             &config,
-                             WDF_NO_HANDLE
-                             );
+        RegistryPath,
+        &attributes,
+        &config,
+        WDF_NO_HANDLE
+    );
 
     if (!NT_SUCCESS(status)) {
         TraceEvents(TRACE_LEVEL_ERROR, TRACE_DRIVER, "WdfDriverCreate failed %!STATUS!", status);
@@ -86,74 +142,4 @@ Return Value:
     TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_DRIVER, "%!FUNC! Exit");
 
     return status;
-}
-
-NTSTATUS
-UsbipdHubFilterEvtDeviceAdd(
-    _In_    WDFDRIVER       Driver,
-    _Inout_ PWDFDEVICE_INIT DeviceInit
-    )
-/*++
-Routine Description:
-
-    EvtDeviceAdd is called by the framework in response to AddDevice
-    call from the PnP manager. We create and initialize a device object to
-    represent a new instance of the device.
-
-Arguments:
-
-    Driver - Handle to a framework driver object created in DriverEntry
-
-    DeviceInit - Pointer to a framework-allocated WDFDEVICE_INIT structure.
-
-Return Value:
-
-    NTSTATUS
-
---*/
-{
-    NTSTATUS status;
-
-    UNREFERENCED_PARAMETER(Driver);
-
-    PAGED_CODE();
-
-    TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_DRIVER, "%!FUNC! Entry");
-
-    status = UsbipdHubFilterCreateDevice(DeviceInit);
-
-    TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_DRIVER, "%!FUNC! Exit");
-
-    return status;
-}
-
-VOID
-UsbipdHubFilterEvtDriverContextCleanup(
-    _In_ WDFOBJECT DriverObject
-    )
-/*++
-Routine Description:
-
-    Free all the resources allocated in DriverEntry.
-
-Arguments:
-
-    DriverObject - handle to a WDF Driver object.
-
-Return Value:
-
-    VOID.
-
---*/
-{
-    UNREFERENCED_PARAMETER(DriverObject);
-
-    PAGED_CODE();
-
-    TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_DRIVER, "%!FUNC! Entry");
-
-    //
-    // Stop WPP Tracing
-    //
-    WPP_CLEANUP(WdfDriverWdmGetDriverObject((WDFDRIVER)DriverObject));
 }

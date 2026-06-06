@@ -11,14 +11,9 @@
 #include "public.h"
 #include "queue.h"
 
-#ifdef ALLOC_PRAGMA
-#pragma alloc_text (PAGE, UsbipdHubFilterCreateDevice)
-#endif
 
-NTSTATUS
-UsbipdHubFilterCreateDevice(
-    _Inout_ PWDFDEVICE_INIT DeviceInit
-    )
+#pragma alloc_text (PAGE, UsbipdHubFilterCreateDevice)
+NTSTATUS UsbipdHubFilterCreateDevice(_Inout_ PWDFDEVICE_INIT DeviceInit)
 /*++
 
 Routine Description:
