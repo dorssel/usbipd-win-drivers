@@ -1,15 +1,11 @@
-;
-; UsbipdStub.inf
-;
-
 [Version]
-Signature="$WINDOWS NT$"
-Class=USBDevice
-ClassGuid={88BAE032-5A81-49f0-BC3D-A4FF138216D6}
-Provider=%ManufacturerName%
-CatalogFile=UsbipdStub.cat
-DriverVer=
-PnpLockDown=1
+Signature   = "$WINDOWS NT$"
+Class       = USBDevice
+ClassGuid   = {88BAE032-5A81-49f0-BC3D-A4FF138216D6}
+Provider    = %ManufacturerName%
+CatalogFile = UsbipdStub.cat
+DriverVer   = ; NOTE: Automatically set by stampinf
+PnpLockDown = 1
 
 [DestinationDirs]
 DefaultDestDir = 13
@@ -18,53 +14,47 @@ DefaultDestDir = 13
 1 = %DiskName%,,,""
 
 [SourceDisksFiles]
-UsbipdStub.sys  = 1,,
-
-;*****************************************
-; Install Section
-;*****************************************
+UsbipdStub.sys = 1,,
 
 [Manufacturer]
-%ManufacturerName%=Standard,NT$ARCH$.10.0...16299 ; %13% support introduced in build 16299
+%ManufacturerName% = Standard,nt$ARCH$.10.0...16299
 
-[Standard.NT$ARCH$.10.0...16299]
-%UsbipdStub.DeviceDescription%=UsbipdStub_Device, USB\VID_vvvv&PID_pppp
+[Standard.nt$ARCH$.10.0...16299]
+%DeviceDescription% = UsbipdStub_Install,USB\VID_vvvv&PID_pppp
 
-[UsbipdStub_Device.NT]
-CopyFiles=File_Copy
+[UsbipdStub_Install.nt$ARCH$]
+CopyFiles = UsbipdStub_Install_Files
 
-[File_Copy]
+[UsbipdStub_Install_Files]
 UsbipdStub.sys
 
-[UsbipdStub_Device.NT.HW]
-AddReg=UsbipdStub_AddReg
+[UsbipdStub_Install.nt$ARCH$.HW]
+AddReg = UsbipdStub_Install_AddReg
 
-[UsbipdStub_AddReg]
+[UsbipdStub_Install_AddReg]
 ; By default, USBDevice class uses iProduct descriptor to name the device
-; Uncomment for this device to use %UsbipdStub.DeviceDescription%
-;HKR,,FriendlyName,,%UsbipdStub.DeviceDescription%
+; Uncomment for this device to use %DeviceDescription%
+;HKR,,FriendlyName,,%DeviceDescription%
 
-;-------------- Service installation
-[UsbipdStub_Device.NT.Services]
-AddService = UsbipdStub,%SPSVCINST_ASSOCSERVICE%, UsbipdStub_Service_Inst
+[UsbipdStub_Install.nt$ARCH$.Services]
+AddService = UsbipdStub,%SPSVCINST_ASSOCSERVICE%,UsbipdStub_Install_Service
 
-; -------------- UsbipdStub driver install sections
-[UsbipdStub_Service_Inst]
-DisplayName    = %UsbipdStub.ServiceDescription%
-ServiceType    = 1               ; SERVICE_KERNEL_DRIVER
-StartType      = 3               ; SERVICE_DEMAND_START
-ErrorControl   = 1               ; SERVICE_ERROR_NORMAL
+[UsbipdStub_Install_Service]
+DisplayName    = %ServiceDescription%
+ServiceType    = 1 ; SERVICE_KERNEL_DRIVER
+StartType      = 3 ; SERVICE_DEMAND_START
+ErrorControl   = 1 ; SERVICE_ERROR_NORMAL
 ServiceBinary  = %13%\UsbipdStub.sys
 
-[UsbipdStub_Device.NT.Wdf]
-KmdfService =  UsbipdStub, UsbipdStub_wdfsect
+[UsbipdStub_Install.nt$ARCH$.Wdf]
+KmdfService = UsbipdStub,UsbipdStub_Install_Wdf
 
-[UsbipdStub_wdfsect]
+[UsbipdStub_Install_Wdf]
 KmdfLibraryVersion = $KMDFVERSION$
 
 [Strings]
-SPSVCINST_ASSOCSERVICE= 0x00000002
-ManufacturerName="Frans van Dorsselaer"
+SPSVCINST_ASSOCSERVICE = 0x00000002
+ManufacturerName = "Frans van Dorsselaer"
 DiskName = "UsbipdStub Installation Disk"
-UsbipdStub.DeviceDescription = "UsbipdStub Device"
-UsbipdStub.ServiceDescription = "UsbipdStub Service"
+DeviceDescription = "UsbipdStub Device"
+ServiceDescription = "UsbipdStub Service"
