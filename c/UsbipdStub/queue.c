@@ -39,8 +39,6 @@ Arguments:
                 Queue, Request, (int) OutputBufferLength, (int) InputBufferLength, IoControlCode);
 
     WdfRequestComplete(Request, STATUS_SUCCESS);
-
-    return;
 }
 
 
@@ -93,8 +91,6 @@ Arguments:
     // guaranteed to complete in a small amount of time. For example, the driver might
     // take no action for requests that are completed in one of the driver’s request handlers.
     //
-
-    return;
 }
 
 

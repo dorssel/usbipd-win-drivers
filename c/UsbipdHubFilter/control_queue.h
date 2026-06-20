@@ -7,4 +7,4 @@
 #include "stdafx.h"
 
 
-#define IOCTL_USB_HUB_FILTER_TEST CTL_CODE(FILE_DEVICE_UNKNOWN, 0x800, METHOD_BUFFERED, FILE_ANY_ACCESS)
+NTSTATUS ControlQueueInitialize(_In_ WDFDEVICE Device);
