@@ -8,6 +8,10 @@ SPDX-License-Identifier: GPL-3.0-only
 
   <Import Project="$([MSBuild]::GetPathOfFileAbove('Directory.Build.props', '$(MSBuildThisFileDirectory)..\'))" />
 
+  <PropertyGroup>
+    <EnableNativePackageReferenceSupport>true</EnableNativePackageReferenceSupport>
+  </PropertyGroup>
+
   <ItemGroup>
     <PackageReference Include="Microsoft.Windows.SDK.CPP" />
     <PackageReference Include="Microsoft.Windows.SDK.CPP.arm64" ExcludeAssets="build" GeneratePathProperty="true" />
