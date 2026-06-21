@@ -5,3 +5,22 @@
 [*]
 cpp_include_cleanup_add_missing_error_tag_type = none
 cpp_include_cleanup_excluded_files = trace.h
+
+# Maintained by Visual Studio
+[*.vcxproj]
+indent_size = 2
+tab_width = 2
+insert_final_newline = false
+
+[*.vcxproj.filters]
+charset = utf-8-bom
+indent_size = 2
+tab_width = 2
+insert_final_newline = false
+
+[*.{c,h}]
+charset = utf-8
+indent_size = 4
+indent_style = space
+insert_final_newline = true
+tab_width = 4

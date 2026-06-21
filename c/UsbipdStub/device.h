@@ -11,11 +11,9 @@
 // The device context performs the same job as
 // a WDM device extension in the driver frameworks
 //
-typedef struct
-{
+typedef struct {
     WDFUSBDEVICE UsbDevice;
     ULONG PrivateDeviceData;  // just a placeholder
-
 } DEVICE_CONTEXT, *PDEVICE_CONTEXT;
 
 //

@@ -12,8 +12,7 @@
 #include "driver.h"
 
 
-static NTSTATUS FilterQueryIdCompletion(_In_ PDEVICE_OBJECT DeviceObject, _In_ PIRP Irp, _In_ PVOID Context)
-{
+static NTSTATUS FilterQueryIdCompletion(_In_ PDEVICE_OBJECT DeviceObject, _In_ PIRP Irp, _In_ PVOID Context) {
     UNREFERENCED_PARAMETER(DeviceObject);
     UNREFERENCED_PARAMETER(Context);
 
@@ -63,14 +62,12 @@ static NTSTATUS FilterQueryIdCompletion(_In_ PDEVICE_OBJECT DeviceObject, _In_ P
 }
 
 
-static NTSTATUS FilterQueryId(_In_ WDFDEVICE Device, _Inout_ PIRP Irp)
-{
+static NTSTATUS FilterQueryId(_In_ WDFDEVICE Device, _Inout_ PIRP Irp) {
     PIO_STACK_LOCATION irpStack = IoGetCurrentIrpStackLocation(Irp);
 
     TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_DEVICE, "FilterQueryId for type %d", irpStack->Parameters.QueryId.IdType);
 
-    switch (irpStack->Parameters.QueryId.IdType)
-    {
+    switch (irpStack->Parameters.QueryId.IdType) {
     case BusQueryCompatibleIDs:
     case BusQueryDeviceID:
     case BusQueryHardwareIDs:
@@ -92,10 +89,9 @@ static NTSTATUS FilterQueryId(_In_ WDFDEVICE Device, _Inout_ PIRP Irp)
 
 
 static EVT_WDF_DEVICE_CONTEXT_CLEANUP FilterEvtDeviceContextCleanup;
-#pragma alloc_text (PAGE, FilterEvtDeviceContextCleanup)
+#pragma alloc_text(PAGE, FilterEvtDeviceContextCleanup)
 _Use_decl_annotations_
-static void FilterEvtDeviceContextCleanup(WDFOBJECT Device)
-{
+static void FilterEvtDeviceContextCleanup(WDFOBJECT Device) {
     PAGED_CODE();
 
     TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_DRIVER, "%!FUNC! Entry");
@@ -119,10 +115,9 @@ static void FilterEvtDeviceContextCleanup(WDFOBJECT Device)
 /// <summary>
 /// This is the EvtDeviceAdd callback function that creates and initializes a new instance of the device each time one is enumerated by the PnP manager.
 /// </summary>
-#pragma alloc_text (PAGE, FilterCreateDevice)
+#pragma alloc_text(PAGE, FilterCreateDevice)
 _Use_decl_annotations_
-NTSTATUS FilterCreateDevice(PWDFDEVICE_INIT DeviceInit)
-{
+NTSTATUS FilterCreateDevice(PWDFDEVICE_INIT DeviceInit) {
     PAGED_CODE();
 
     //

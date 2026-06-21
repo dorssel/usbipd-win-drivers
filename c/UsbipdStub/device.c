@@ -13,26 +13,8 @@
 
 
 static EVT_WDF_DEVICE_PREPARE_HARDWARE UsbipdStubEvtDevicePrepareHardware;
-#pragma alloc_text (PAGE, UsbipdStubEvtDevicePrepareHardware)
-static NTSTATUS UsbipdStubEvtDevicePrepareHardware(_In_ WDFDEVICE Device, _In_ WDFCMRESLIST ResourceList, _In_ WDFCMRESLIST ResourceListTranslated)
-/*++
-
-Routine Description:
-
-    In this callback, the driver does whatever is necessary to make the
-    hardware ready to use.  In the case of a USB device, this involves
-    reading and selecting descriptors.
-
-Arguments:
-
-    Device - handle to a device
-
-Return Value:
-
-    NT status value
-
---*/
-{
+#pragma alloc_text(PAGE, UsbipdStubEvtDevicePrepareHardware)
+static NTSTATUS UsbipdStubEvtDevicePrepareHardware(_In_ WDFDEVICE Device, _In_ WDFCMRESLIST ResourceList, _In_ WDFCMRESLIST ResourceListTranslated) {
     NTSTATUS status;
     PDEVICE_CONTEXT pDeviceContext;
     WDF_USB_DEVICE_CREATE_CONFIG createParams;
@@ -60,22 +42,15 @@ Return Value:
     // restart.
     //
     if (pDeviceContext->UsbDevice == NULL) {
-
         //
         // Specifying a client contract version of 602 enables us to query for
         // and use the new capabilities of the USB driver stack for Windows 8.
         // It also implies that we conform to rules mentioned in MSDN
         // documentation for WdfUsbTargetDeviceCreateWithParameters.
         //
-        WDF_USB_DEVICE_CREATE_CONFIG_INIT(&createParams,
-                                         USBD_CLIENT_CONTRACT_VERSION_602
-                                         );
+        WDF_USB_DEVICE_CREATE_CONFIG_INIT(&createParams, USBD_CLIENT_CONTRACT_VERSION_602);
 
-        status = WdfUsbTargetDeviceCreateWithParameters(Device,
-                                                    &createParams,
-                                                    WDF_NO_OBJECT_ATTRIBUTES,
-                                                    &pDeviceContext->UsbDevice
-                                                    );
+        status = WdfUsbTargetDeviceCreateWithParameters(Device, &createParams, WDF_NO_OBJECT_ATTRIBUTES, &pDeviceContext->UsbDevice);
 
         if (!NT_SUCCESS(status)) {
             TraceEvents(TRACE_LEVEL_ERROR, TRACE_DEVICE,
@@ -88,14 +63,8 @@ Return Value:
     // Select the first configuration of the device, using the first alternate
     // setting of each interface
     //
-    WDF_USB_DEVICE_SELECT_CONFIG_PARAMS_INIT_MULTIPLE_INTERFACES(&configParams,
-                                                                 0,
-                                                                 NULL
-                                                                 );
-    status = WdfUsbTargetDeviceSelectConfig(pDeviceContext->UsbDevice,
-                                            WDF_NO_OBJECT_ATTRIBUTES,
-                                            &configParams
-                                            );
+    WDF_USB_DEVICE_SELECT_CONFIG_PARAMS_INIT_MULTIPLE_INTERFACES(&configParams, 0, NULL);
+    status = WdfUsbTargetDeviceSelectConfig(pDeviceContext->UsbDevice, WDF_NO_OBJECT_ATTRIBUTES, &configParams);
 
     if (!NT_SUCCESS(status)) {
         TraceEvents(TRACE_LEVEL_ERROR, TRACE_DEVICE,
@@ -109,26 +78,8 @@ Return Value:
 }
 
 
-#pragma alloc_text (PAGE, UsbipdStubCreateDevice)
-NTSTATUS UsbipdStubCreateDevice(_Inout_ PWDFDEVICE_INIT DeviceInit)
-/*++
-
-Routine Description:
-
-    Worker routine called to create a device and its software resources.
-
-Arguments:
-
-    DeviceInit - Pointer to an opaque init structure. Memory for this
-                    structure will be freed by the framework when the WdfDeviceCreate
-                    succeeds. So don't access the structure after that point.
-
-Return Value:
-
-    NTSTATUS
-
---*/
-{
+#pragma alloc_text(PAGE, UsbipdStubCreateDevice)
+NTSTATUS UsbipdStubCreateDevice(_Inout_ PWDFDEVICE_INIT DeviceInit) {
     WDF_PNPPOWER_EVENT_CALLBACKS pnpPowerCallbacks;
     WDF_OBJECT_ATTRIBUTES   deviceAttributes;
     PDEVICE_CONTEXT deviceContext;
@@ -166,11 +117,7 @@ Return Value:
         // Create a device interface so that applications can find and talk
         // to us.
         //
-        status = WdfDeviceCreateDeviceInterface(
-            device,
-            &GUID_DEVINTERFACE_USBIPD_STUB,
-            NULL // ReferenceString
-        );
+        status = WdfDeviceCreateDeviceInterface(device, &GUID_DEVINTERFACE_USBIPD_STUB, NULL);
 
         if (NT_SUCCESS(status)) {
             //

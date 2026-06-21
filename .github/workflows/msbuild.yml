@@ -25,45 +25,45 @@ jobs:
       attestations: write
 
     steps:
-    - name: Checkout
-      uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
-      with:
-        persist-credentials: false
-        fetch-depth: 0
+      - name: Checkout
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+        with:
+          persist-credentials: false
+          fetch-depth: 0
 
-    - name: Setup MSBuild
-      uses: microsoft/setup-msbuild@30375c66a4eea26614e0d39710365f22f8b0af57 # v3.0.0
-      with:
-        msbuild-architecture: x64
+      - name: Setup MSBuild
+        uses: microsoft/setup-msbuild@30375c66a4eea26614e0d39710365f22f8b0af57 # v3.0.0
+        with:
+          msbuild-architecture: x64
 
-    - name: Setup .NET
-      uses: actions/setup-dotnet@9a946fdbd5fb07b82b2f5a4466058b876ab72bb2 # v5.3.0
-      with:
-        cache: true
-        cache-dependency-path: |
-          global.json
-          '**/packages.lock.json'
+      - name: Setup .NET
+        uses: actions/setup-dotnet@9a946fdbd5fb07b82b2f5a4466058b876ab72bb2 # v5.3.0
+        with:
+          cache: true
+          cache-dependency-path: |
+            global.json
+            '**/packages.lock.json'
 
-    - name: Restore dependencies
-      run: |
-        msbuild /t:Restore
+      - name: Restore dependencies
+        run: |
+          msbuild /t:Restore
 
-    - name: Build x64 Drivers
-      run: |
-        msbuild /m /p:Configuration=Release /p:Platform=x64
+      - name: Build x64 Drivers
+        run: |
+          msbuild /m /p:Configuration=Release /p:Platform=x64
 
-    - name: Build arm64 Drivers
-      run: |
-        msbuild /m /p:Configuration=Release /p:Platform=ARM64
+      - name: Build arm64 Drivers
+        run: |
+          msbuild /m /p:Configuration=Release /p:Platform=ARM64
 
-    - name: Upload Artifacts
-      id: upload
-      uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
-      with:
-        name: artifacts
-        path: |
-          x64/Release/*/*
-          ARM64/Release/*/*
+      - name: Upload Artifacts
+        id: upload
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: artifacts
+          path: |
+            x64/Release/*/*
+            ARM64/Release/*/*
 
 # NOTE: Enable once repository is public
 #     - name: Build Attestation

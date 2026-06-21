@@ -12,10 +12,9 @@
 
 
 static EVT_WDF_DRIVER_DEVICE_ADD FilterEvtDeviceAdd;
-#pragma alloc_text (PAGE, FilterEvtDeviceAdd)
+#pragma alloc_text(PAGE, FilterEvtDeviceAdd)
 _Use_decl_annotations_
-static NTSTATUS FilterEvtDeviceAdd(WDFDRIVER Driver, PWDFDEVICE_INIT DeviceInit)
-{
+static NTSTATUS FilterEvtDeviceAdd(WDFDRIVER Driver, PWDFDEVICE_INIT DeviceInit) {
     UNREFERENCED_PARAMETER(Driver);
     PAGED_CODE();
 
@@ -30,10 +29,9 @@ static NTSTATUS FilterEvtDeviceAdd(WDFDRIVER Driver, PWDFDEVICE_INIT DeviceInit)
 
 
 static EVT_WDF_OBJECT_CONTEXT_CLEANUP FilterEvtDriverContextCleanup;
-#pragma alloc_text (PAGE, FilterEvtDriverContextCleanup)
+#pragma alloc_text(PAGE, FilterEvtDriverContextCleanup)
 _Use_decl_annotations_
-static void FilterEvtDriverContextCleanup(WDFOBJECT DriverObject)
-{
+static void FilterEvtDriverContextCleanup(WDFOBJECT DriverObject) {
     UNREFERENCED_PARAMETER(DriverObject);
     PAGED_CODE();
     TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_DRIVER, "%!FUNC! Entry");
@@ -42,10 +40,9 @@ static void FilterEvtDriverContextCleanup(WDFOBJECT DriverObject)
 }
 
 
-#pragma alloc_text (INIT, DriverEntry)
+#pragma alloc_text(INIT, DriverEntry)
 _Use_decl_annotations_
-NTSTATUS DriverEntry(PDRIVER_OBJECT DriverObject, PUNICODE_STRING RegistryPath)
-{
+NTSTATUS DriverEntry(PDRIVER_OBJECT DriverObject, PUNICODE_STRING RegistryPath) {
     //
     // Required for POOL_ZERO_DOWN_LEVEL_SUPPORT (< Windows 10 2004). We do not need POOL_NX_OPTIN (< Windows 8).
     // Must be called before anything else.
@@ -84,8 +81,7 @@ NTSTATUS DriverEntry(PDRIVER_OBJECT DriverObject, PUNICODE_STRING RegistryPath)
     //
     PDRIVER_CONTEXT driverContext = DriverGetContext(driver);
     status = WdfWaitLockCreate(WDF_NO_OBJECT_ATTRIBUTES, &driverContext->ControlDeviceLock);
-    if (!NT_SUCCESS(status))
-    {
+    if (!NT_SUCCESS(status)) {
         TraceEvents(TRACE_LEVEL_ERROR, TRACE_DRIVER, "WdfWaitLockCreate failed %!STATUS!", status);
         return status;
     }

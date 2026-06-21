@@ -8,15 +8,14 @@
 .gitattributes   text
 .gitignore       text
 .editorconfig    text
-.json            text
-.license         text
 
+*.license        text
+
+*.cfg   text
 *.json  text
 *.md    text
 *.txt   text
 *.yml   text
-
-nuget.config    text
 
 *.slnx  text
 *.props     text
@@ -31,3 +30,5 @@ nuget.config    text
 *.csproj    text
 *.cs        text eol=crlf
 *.tt        text
+
+*.config    text
