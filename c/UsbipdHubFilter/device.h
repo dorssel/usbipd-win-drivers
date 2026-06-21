@@ -7,8 +7,7 @@
 #include "stdafx.h"
 
 
-typedef struct _DEVICE_CONTEXT
-{
+typedef struct _DEVICE_CONTEXT {
     WDFSTRING DeviceInterfaceSymbolicLinkName;
 } DEVICE_CONTEXT, *PDEVICE_CONTEXT;
 

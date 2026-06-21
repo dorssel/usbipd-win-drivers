@@ -1,0 +1,47 @@
+# SPDX-FileCopyrightText: 2026 Frans van Dorsselaer
+#
+# SPDX-License-Identifier: GPL-3.0-only
+
+---
+# yamllint disable-line rule:line-length
+# yaml-language-server: $schema=https://raw.githubusercontent.com/megalinter/megalinter/main/megalinter/descriptors/schemas/megalinter-configuration.jsonschema.json
+
+# Configuration file for MegaLinter
+# See all available variables at https://megalinter.github.io/configuration/ and in linters documentation
+
+# APPLY_FIXES: all # all, none, or list of linter keys
+# ENABLE: # If you use ENABLE variable, all other languages/formats/tooling-formats will be disabled by default
+# ENABLE_LINTERS: # If you use ENABLE_LINTERS variable, all other linters will be disabled by default
+DISABLE:
+  - COPYPASTE # Comment to enable checks of excessive copy-pastes
+  - SPELL # Comment to enable checks of spelling mistakes
+DISABLE_LINTERS:
+  - CSHARP_DOTNET_FORMAT # Not compatible with .NET 8 (yet)
+  - CSHARP_CSHARPIER # Not compatible with .NET 8 (yet)
+  - CSHARP_ROSLYNATOR # Not compatible with .NET 8 (yet)
+  - REPOSITORY_TRIVY # Unstable, leading to a lot of build failures
+SHOW_ELAPSED_TIME: true
+FILEIO_REPORTER: false
+# DISABLE_ERRORS: true # Uncomment if you want MegaLinter to detect errors but not block CI to pass
+XML_XMLLINT_FILE_EXTENSIONS:
+  - .xml
+  - .xslt
+  - .slnx
+  - .vcxproj
+  - .csproj
+  - .props
+  - .targets
+  - .pubxml
+  - .wixproj
+  - .wxs
+# All our headers are plain C headers, so we can exclude them from C++ checks.
+CPP_FILTER_REGEX_EXCLUDE: \.h$
+C_CPPCHECK_ARGUMENTS:
+  - -DWDF_DECLARE_CONTEXT_TYPE_WITH_NAME(x,y)=
+# Exclude verbatim copies of external sources that are not under our control.
+# Also exclude auto-generated files.
+FILTER_REGEX_EXCLUDE: LICENSE\.txt|LICENSES/|global\.json|dotnet-tools\.json|packages\.lock\.json|csharp/VersionHelper/VersionInfo\.cs
+# Exclude additional binary files not already excluded by default.
+EDITORCONFIG_EDITORCONFIG_CHECKER_FILTER_REGEX_EXCLUDE: (\.snk$)
+ACTION_ZIZMOR_UNSECURED_ENV_VARIABLES:
+  - GITHUB_TOKEN

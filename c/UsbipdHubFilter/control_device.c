@@ -12,10 +12,9 @@
 #include "driver.h"
 
 
-#pragma alloc_text (PAGE, ControlCreateDevice)
+#pragma alloc_text(PAGE, ControlCreateDevice)
 _Use_decl_annotations_
-NTSTATUS ControlCreateDevice(WDFDRIVER driver)
-{
+NTSTATUS ControlCreateDevice(WDFDRIVER driver) {
     static DECLARE_CONST_UNICODE_STRING(deviceName, L"\\Device\\UsbipdHubFilter");
     static DECLARE_CONST_UNICODE_STRING(deviceSymbolicLinkName, L"\\DosDevices\\UsbipdHubFilter");
 

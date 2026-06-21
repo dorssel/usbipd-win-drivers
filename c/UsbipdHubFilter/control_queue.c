@@ -17,8 +17,7 @@
 /// </summary>
 static EVT_WDF_IO_QUEUE_IO_DEVICE_CONTROL ControlEvtIoDeviceControl;
 _Use_decl_annotations_
-static void ControlEvtIoDeviceControl(WDFQUEUE Queue, WDFREQUEST Request, size_t OutputBufferLength, size_t InputBufferLength, ULONG IoControlCode)
-{
+static void ControlEvtIoDeviceControl(WDFQUEUE Queue, WDFREQUEST Request, size_t OutputBufferLength, size_t InputBufferLength, ULONG IoControlCode) {
     UNREFERENCED_PARAMETER(OutputBufferLength);
     UNREFERENCED_PARAMETER(InputBufferLength);
 
@@ -29,7 +28,6 @@ static void ControlEvtIoDeviceControl(WDFQUEUE Queue, WDFREQUEST Request, size_t
 
     NTSTATUS status;
     switch (IoControlCode) {
-
     case IOCTL_USB_HUB_FILTER_TEST:
     {
         WDFDEVICE device = WdfIoQueueGetDevice(Queue);
@@ -52,10 +50,9 @@ static void ControlEvtIoDeviceControl(WDFQUEUE Queue, WDFREQUEST Request, size_t
 }
 
 
-#pragma alloc_text (PAGE, ControlQueueInitialize)
+#pragma alloc_text(PAGE, ControlQueueInitialize)
 _Use_decl_annotations_
-NTSTATUS ControlQueueInitialize(WDFDEVICE Device)
-{
+NTSTATUS ControlQueueInitialize(WDFDEVICE Device) {
     PAGED_CODE();
 
     WDF_IO_QUEUE_CONFIG queueConfig;

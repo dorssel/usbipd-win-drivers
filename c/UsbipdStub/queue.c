@@ -11,31 +11,10 @@
 
 static EVT_WDF_IO_QUEUE_IO_DEVICE_CONTROL UsbipdStubEvtIoDeviceControl;
 static void UsbipdStubEvtIoDeviceControl(_In_ WDFQUEUE Queue, _In_ WDFREQUEST Request, _In_ size_t OutputBufferLength, _In_ size_t InputBufferLength,
-    _In_ ULONG IoControlCode)
-/*++
-
-Routine Description:
-
-    This event is invoked when the framework receives IRP_MJ_DEVICE_CONTROL request.
-
-Arguments:
-
-    Queue -  Handle to the framework queue object that is associated with the
-             I/O request.
-
-    Request - Handle to a framework request object.
-
-    OutputBufferLength - Size of the output buffer in bytes
-
-    InputBufferLength - Size of the input buffer in bytes
-
-    IoControlCode - I/O control code.
-
---*/
-{
-    TraceEvents(TRACE_LEVEL_INFORMATION, 
-                TRACE_QUEUE, 
-                "%!FUNC! Queue 0x%p, Request 0x%p OutputBufferLength %d InputBufferLength %d IoControlCode %d", 
+        _In_ ULONG IoControlCode) {
+    TraceEvents(TRACE_LEVEL_INFORMATION,
+                TRACE_QUEUE,
+                "%!FUNC! Queue 0x%p, Request 0x%p OutputBufferLength %d InputBufferLength %d IoControlCode %d",
                 Queue, Request, (int) OutputBufferLength, (int) InputBufferLength, IoControlCode);
 
     WdfRequestComplete(Request, STATUS_SUCCESS);
@@ -43,29 +22,10 @@ Arguments:
 
 
 static EVT_WDF_IO_QUEUE_IO_STOP UsbipdStubEvtIoStop;
-static void UsbipdStubEvtIoStop(_In_ WDFQUEUE Queue, _In_ WDFREQUEST Request, _In_ ULONG ActionFlags)
-/*++
-
-Routine Description:
-
-    This event is invoked for a power-managed queue before the device leaves the working state (D0).
-
-Arguments:
-
-    Queue -  Handle to the framework queue object that is associated with the
-             I/O request.
-
-    Request - Handle to a framework request object.
-
-    ActionFlags - A bitwise OR of one or more WDF_REQUEST_STOP_ACTION_FLAGS-typed flags
-                  that identify the reason that the callback function is being called
-                  and whether the request is cancelable.
-
---*/
-{
-    TraceEvents(TRACE_LEVEL_INFORMATION, 
-                TRACE_QUEUE, 
-                "%!FUNC! Queue 0x%p, Request 0x%p ActionFlags %d", 
+static void UsbipdStubEvtIoStop(_In_ WDFQUEUE Queue, _In_ WDFREQUEST Request, _In_ ULONG ActionFlags) {
+    TraceEvents(TRACE_LEVEL_INFORMATION,
+                TRACE_QUEUE,
+                "%!FUNC! Queue 0x%p, Request 0x%p ActionFlags %d",
                 Queue, Request, ActionFlags);
 
     //
@@ -77,7 +37,7 @@ Arguments:
     // - If the driver owns the I/O request, it either postpones further processing
     //   of the request and calls WdfRequestStopAcknowledge, or it calls WdfRequestComplete
     //   with a completion status value of STATUS_SUCCESS or STATUS_CANCELLED.
-    //  
+    //
     //   The driver must call WdfRequestComplete only once, to either complete or cancel
     //   the request. To ensure that another thread does not call WdfRequestComplete
     //   for the same request, the EvtIoStop callback must synchronize with the driver's
@@ -94,30 +54,8 @@ Arguments:
 }
 
 
-#pragma alloc_text (PAGE, UsbipdStubQueueInitialize)
-NTSTATUS UsbipdStubQueueInitialize(_In_ WDFDEVICE Device)
-/*++
-
-Routine Description:
-
-
-     The I/O dispatch callbacks for the frameworks device object
-     are configured in this function.
-
-     A single default I/O Queue is configured for parallel request
-     processing, and a driver context memory allocation is created
-     to hold our structure QUEUE_CONTEXT.
-
-Arguments:
-
-    Device - Handle to a framework device object.
-
-Return Value:
-
-    NTSTATUS
-
---*/
-{
+#pragma alloc_text(PAGE, UsbipdStubQueueInitialize)
+NTSTATUS UsbipdStubQueueInitialize(_In_ WDFDEVICE Device) {
     WDFQUEUE queue;
     NTSTATUS status;
     WDF_IO_QUEUE_CONFIG    queueConfig;
@@ -129,20 +67,12 @@ Return Value:
     // configure-forwarded using WdfDeviceConfigureRequestDispatching to go to
     // other queues get dispatched here.
     //
-    WDF_IO_QUEUE_CONFIG_INIT_DEFAULT_QUEUE(
-        &queueConfig,
-        WdfIoQueueDispatchParallel
-    );
+    WDF_IO_QUEUE_CONFIG_INIT_DEFAULT_QUEUE(&queueConfig, WdfIoQueueDispatchParallel);
 
     queueConfig.EvtIoDeviceControl = UsbipdStubEvtIoDeviceControl;
     queueConfig.EvtIoStop = UsbipdStubEvtIoStop;
 
-    status = WdfIoQueueCreate(
-        Device,
-        &queueConfig,
-        WDF_NO_OBJECT_ATTRIBUTES,
-        &queue
-    );
+    status = WdfIoQueueCreate(Device, &queueConfig, WDF_NO_OBJECT_ATTRIBUTES, &queue);
 
     if (!NT_SUCCESS(status)) {
         TraceEvents(TRACE_LEVEL_ERROR, TRACE_QUEUE, "WdfIoQueueCreate failed %!STATUS!", status);
