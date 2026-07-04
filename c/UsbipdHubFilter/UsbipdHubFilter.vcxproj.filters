@@ -29,7 +29,7 @@ SPDX-License-Identifier: GPL-3.0-only
     </Inf>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="device.h">
+    <ClInclude Include="hub_device.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="driver.h">
@@ -50,9 +50,12 @@ SPDX-License-Identifier: GPL-3.0-only
     <ClInclude Include="control_queue.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="child_device.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="device.c">
+    <ClCompile Include="hub_device.c">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="driver.c">
@@ -65,6 +68,9 @@ SPDX-License-Identifier: GPL-3.0-only
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="control_queue.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="child_device.c">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

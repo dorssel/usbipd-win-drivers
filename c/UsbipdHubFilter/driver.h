@@ -11,9 +11,12 @@
 // This is a singleton object shared by all devices.
 //
 typedef struct _DRIVER_CONTEXT {
-    WDFWAITLOCK ControlDeviceLock;
-    LONG ControlDeviceCount;
+    PDRIVER_DISPATCH WdfDispatch[IRP_MJ_MAXIMUM_FUNCTION + 1];
+
+    WDFWAITLOCK HubDeviceLock;
+    LONG HubDeviceCount;
     WDFDEVICE ControlDevice;
+
     int GlobalTestCounter;
 } DRIVER_CONTEXT, * PDRIVER_CONTEXT;
 

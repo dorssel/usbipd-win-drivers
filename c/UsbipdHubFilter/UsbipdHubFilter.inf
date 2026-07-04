@@ -17,21 +17,30 @@ DefaultDestDir = 13
 [SourceDisksFiles]
 UsbipdHubFilter.sys = 1,,
 
-; NOTE: We still support Windows Server 2019 (build 17763).
-
 [Manufacturer]
-%ManufacturerName% = UsbipdHubFilter,nt$ARCH$.10.0...17763
+%ManufacturerName% = UsbipdHubFilter,nt$ARCH$.10.0...18362,nt$ARCH$.10.0...17763
 
-[UsbipdHubFilter.nt$ARCH$.10.0...17763]
+[UsbipdHubFilter.nt$ARCH$.10.0...18362]
 %DeviceDescription% = UsbipdHubFilter_Install,USB\VID_0409&PID_005A&REV_0100
 
+; NOTE: Windows 1809 does not support AddFilter
+
+[UsbipdHubFilter.nt$ARCH$.10.0...17763]
+%DeviceDescription% = UsbipdHubFilter_InstallLegacy,USB\VID_0409&PID_005A&REV_0100
+
 [UsbipdHubFilter_Install.nt$ARCH$]
+CopyFiles = UsbipdHubFilter_Install_Files
+
+[UsbipdHubFilter_InstallLegacy.nt$ARCH$]
 CopyFiles = UsbipdHubFilter_Install_Files
 
 [UsbipdHubFilter_Install_Files]
 UsbipdHubFilter.sys
 
 [UsbipdHubFilter_Install.nt$ARCH$.Services]
+AddService = UsbipdHubFilter,,UsbipdHubFilter_Install_Service
+
+[UsbipdHubFilter_InstallLegacy.nt$ARCH$.Services]
 AddService = UsbipdHubFilter,,UsbipdHubFilter_Install_Service
 
 [UsbipdHubFilter_Install_Service]
@@ -44,15 +53,22 @@ ServiceBinary  = %13%\UsbipdHubFilter.sys
 [UsbipdHubFilter_Install.nt$ARCH$.Wdf]
 KmdfService = UsbipdHubFilter,UsbipdHubFilter_Install_Wdf
 
+[UsbipdHubFilter_InstallLegacy.nt$ARCH$.Wdf]
+KmdfService = UsbipdHubFilter,UsbipdHubFilter_Install_Wdf
+
 [UsbipdHubFilter_Install_Wdf]
 KmdfLibraryVersion = $KMDFVERSION$
 
-; NOTE: Modern declarative AddFilter requires Windows >= 1903.
+[UsbipdHubFilter_Install.nt$ARCH$.Filters]
+AddFilter=UsbipdHubFilter,0,UsbipdHubFilter_Install_Filter
 
-[UsbipdHubFilter_Install.nt$ARCH$.HW]
-AddReg=UsbipdHubFilter_Install_Registry
+[UsbipdHubFilter_Install_Filter]
+FilterPosition=Upper
 
-[UsbipdHubFilter_Install_Registry]
+[UsbipdHubFilter_InstallLegacy.nt$ARCH$.HW]
+AddReg=UsbipdHubFilter_InstallLegacy_Registry
+
+[UsbipdHubFilter_InstallLegacy_Registry]
 HKR,,"UpperFilters",0x00010008,"UsbipdHubFilter"
 
 [Strings]

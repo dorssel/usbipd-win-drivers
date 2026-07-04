@@ -24,9 +24,10 @@ SPDX-License-Identifier: GPL-3.0-only
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="child_device.c" />
     <ClCompile Include="control_device.c" />
     <ClCompile Include="control_queue.c" />
-    <ClCompile Include="device.c" />
+    <ClCompile Include="hub_device.c" />
     <ClCompile Include="driver.c" />
     <ClCompile Include="stdafx.c">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|ARM64'">Create</PrecompiledHeader>
@@ -36,9 +37,10 @@ SPDX-License-Identifier: GPL-3.0-only
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="child_device.h" />
     <ClInclude Include="control_device.h" />
     <ClInclude Include="control_queue.h" />
-    <ClInclude Include="device.h" />
+    <ClInclude Include="hub_device.h" />
     <ClInclude Include="driver.h" />
     <ClInclude Include="public.h" />
     <ClInclude Include="stdafx.h" />
@@ -64,10 +66,11 @@ SPDX-License-Identifier: GPL-3.0-only
     <PlatformToolset>WindowsKernelModeDriver10.0</PlatformToolset>
     <ConfigurationType>Driver</ConfigurationType>
     <DriverType>KMDF</DriverType>
-    <DriverTargetPlatform>Windows Driver</DriverTargetPlatform>
+    <DriverTargetPlatform>Universal</DriverTargetPlatform>
     <ValidationVersion>10.0.17763</ValidationVersion>
     <KMDF_VERSION_MAJOR>1</KMDF_VERSION_MAJOR>
     <KMDF_VERSION_MINOR>27</KMDF_VERSION_MINOR>
+    <_NT_TARGET_VERSION>0xA000006</_NT_TARGET_VERSION>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
     <TargetVersion>Windows10</TargetVersion>
@@ -75,10 +78,11 @@ SPDX-License-Identifier: GPL-3.0-only
     <PlatformToolset>WindowsKernelModeDriver10.0</PlatformToolset>
     <ConfigurationType>Driver</ConfigurationType>
     <DriverType>KMDF</DriverType>
-    <DriverTargetPlatform>Windows Driver</DriverTargetPlatform>
+    <DriverTargetPlatform>Universal</DriverTargetPlatform>
     <ValidationVersion>10.0.17763</ValidationVersion>
     <KMDF_VERSION_MAJOR>1</KMDF_VERSION_MAJOR>
     <KMDF_VERSION_MINOR>27</KMDF_VERSION_MINOR>
+    <_NT_TARGET_VERSION>0xA000006</_NT_TARGET_VERSION>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|ARM64'" Label="Configuration">
     <TargetVersion>Windows10</TargetVersion>
@@ -86,10 +90,11 @@ SPDX-License-Identifier: GPL-3.0-only
     <PlatformToolset>WindowsKernelModeDriver10.0</PlatformToolset>
     <ConfigurationType>Driver</ConfigurationType>
     <DriverType>KMDF</DriverType>
-    <DriverTargetPlatform>Windows Driver</DriverTargetPlatform>
+    <DriverTargetPlatform>Universal</DriverTargetPlatform>
     <ValidationVersion>10.0.17763</ValidationVersion>
     <KMDF_VERSION_MAJOR>1</KMDF_VERSION_MAJOR>
     <KMDF_VERSION_MINOR>27</KMDF_VERSION_MINOR>
+    <_NT_TARGET_VERSION>0xA000006</_NT_TARGET_VERSION>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|ARM64'" Label="Configuration">
     <TargetVersion>Windows10</TargetVersion>
@@ -97,10 +102,11 @@ SPDX-License-Identifier: GPL-3.0-only
     <PlatformToolset>WindowsKernelModeDriver10.0</PlatformToolset>
     <ConfigurationType>Driver</ConfigurationType>
     <DriverType>KMDF</DriverType>
-    <DriverTargetPlatform>Windows Driver</DriverTargetPlatform>
+    <DriverTargetPlatform>Universal</DriverTargetPlatform>
     <ValidationVersion>10.0.17763</ValidationVersion>
     <KMDF_VERSION_MAJOR>1</KMDF_VERSION_MAJOR>
     <KMDF_VERSION_MINOR>27</KMDF_VERSION_MINOR>
+    <_NT_TARGET_VERSION>0xA000006</_NT_TARGET_VERSION>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
   <ImportGroup Label="ExtensionSettings">
