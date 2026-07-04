@@ -13,5 +13,5 @@
 #include <wdf.h>
 
 
-// Hub F(ilter), in reverse.
+// Hub Filter, in reverse.
 #define POOL_TAG 'FbuH'
