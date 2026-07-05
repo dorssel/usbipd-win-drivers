@@ -8,106 +8,81 @@
 #include "trace.h"
 #include "hub_device.tmh"
 
+#include "child_device.h"
 #include "control_device.h"
 #include "driver.h"
 
 
-#if false
-static NTSTATUS FilterQueryIdCompletion(_In_ PDEVICE_OBJECT DeviceObject, _In_ PIRP Irp, _In_ PVOID Context) {
-    UNREFERENCED_PARAMETER(DeviceObject);
-    UNREFERENCED_PARAMETER(Context);
+BOOLEAN AddChildToCollection(WDFDRIVER Driver, PDEVICE_OBJECT ChildDevice) {
+    TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_DEVICE, "%!FUNC! Entry");
 
-    // Propagate the pending flag if necessary
-    if (Irp->PendingReturned) {
-        IoMarkIrpPending(Irp);
-    }
+    PDRIVER_CONTEXT driverContext = DriverGetContext(Driver);
 
-    if (!NT_SUCCESS(Irp->IoStatus.Status) || (Irp->IoStatus.Information == 0)) {
-        // No need to modify failed results. Note that the completion itself succeeds.
-        return STATUS_SUCCESS;
-    }
-
-    PWCHAR originalBuffer = (PWCHAR)Irp->IoStatus.Information;
-
-    PIO_STACK_LOCATION irpStack = IoGetCurrentIrpStackLocation(Irp);
-    TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_DEVICE, "FilterQueryIdCompletion for type %d: %ws", irpStack->Parameters.QueryId.IdType, originalBuffer);
-
-    // 1. Inspect originalBuffer to see if it is our target device.
-    if (_wcsicmp(originalBuffer, L"USB\\VID_1234&PID_5678") == 0) {
-        // 2. Define your new string length (Example: replacing with your targeted spoof string)
-        // Be sure to account for multi-string double null-terminators if processing HardwareIDs!
-        size_t newBufferLengthInBytes = 128;
-
-        // 3. Allocate a brand new buffer from the Paged Pool
-        PWCHAR newBuffer = (PWCHAR)ExAllocatePoolZero(POOL_FLAG_PAGED, newBufferLengthInBytes, POOL_TAG);
-
-        if (newBuffer != NULL) {
-            if (!NT_SUCCESS(RtlStringCbCopyW(newBuffer, newBufferLengthInBytes, L"USB\\VID_ABCD&PID_9999"))) {
-                // This should never happen since we allocated enough memory, but if it does, free the new buffer and
-                // return success to avoid crashing the system. The original buffer is still intact and will be used by
-                // the child hub driver.
-                TraceEvents(TRACE_LEVEL_ERROR, TRACE_DEVICE, "FilterQueryIdCompletion unable to overwrite ID");
-                ExFreePoolWithTag(newBuffer, POOL_TAG);
-                return STATUS_SUCCESS;
-            }
-
-            // 4. Free the old memory buffer returned by the child hub driver
-            ExFreePool(originalBuffer);
-
-            // 5. Replace the IRP's information pointer with your new buffer
-            Irp->IoStatus.Information = (ULONG_PTR)newBuffer;
+    (void)WdfWaitLockAcquire(driverContext->ChildDeviceLock, NULL);
+    ULONG count = WdfCollectionGetCount(driverContext->ChildDeviceCollection);
+    for (ULONG i = 0; i < count; i++) {
+        PCHILD_OBJECT_CONTEXT childObjectContext = WdfObjectGetContext(WdfCollectionGetItem(driverContext->ChildDeviceCollection, i));
+        if (childObjectContext->ChildDevice == ChildDevice) {
+            TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_DEVICE, "%!FUNC! Child device %p is already in the collection", ChildDevice);
+            WdfWaitLockRelease(driverContext->ChildDeviceLock);
+            return FALSE;
         }
     }
 
-    return STATUS_SUCCESS;
-}
-
-
-static NTSTATUS FilterQueryId(_In_ WDFDEVICE Device, _Inout_ PIRP Irp) {
-    PIO_STACK_LOCATION irpStack = IoGetCurrentIrpStackLocation(Irp);
-
-    TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_DEVICE, "FilterQueryId for type %d", irpStack->Parameters.QueryId.IdType);
-
-    switch (irpStack->Parameters.QueryId.IdType) {
-    case BusQueryCompatibleIDs:
-    case BusQueryDeviceID:
-    case BusQueryHardwareIDs:
-    case BusQueryInstanceID:
-        // Set up the completion routine to catch the response on the way back up.
-        IoCopyCurrentIrpStackLocationToNext(Irp);
-        IoSetCompletionRoutine(Irp, FilterQueryIdCompletion, Device, TRUE, TRUE, TRUE);
-        break;
-
-    // case BusQueryContainerID: // not interested, GUID instead of string
-    // case BusQueryDeviceSerialNumber: // reserved
-    default:
-        // We cannot interpret anything else. Just pass it down without interception.
-        IoSkipCurrentIrpStackLocation(Irp);
+    PDEVICE_OBJECT childFilterDevice;
+    NTSTATUS status = IoCreateDevice(WdfDriverWdmGetDriverObject(Driver), sizeof(CHILD_DEVICE_CONTEXT), NULL, FILE_DEVICE_UNKNOWN, 0, FALSE,
+        &childFilterDevice);
+    if (!NT_SUCCESS(status)) {
+        TraceEvents(TRACE_LEVEL_ERROR, TRACE_DEVICE, "%!FUNC! IoCreateDevice failed %!STATUS!", status);
+        WdfWaitLockRelease(driverContext->ChildDeviceLock);
+        return FALSE;
     }
 
-    return WdfDeviceWdmDispatchPreprocessedIrp(Device, Irp);
-}
+    PCHILD_DEVICE_CONTEXT childDeviceContext = (PCHILD_DEVICE_CONTEXT)childFilterDevice->DeviceExtension;
+    childDeviceContext->Magic = CHILD_DEVICE_MAGIC;
 
-static NTSTATUS QueryIdCompletion(_In_ PDEVICE_OBJECT DeviceObject, _In_ PIRP Irp, _In_ PVOID Context) {
-    UNREFERENCED_PARAMETER(DeviceObject);
-
-    TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_DEVICE, "%!FUNC! Entry");
-
-    if (NT_SUCCESS(Irp->IoStatus.Status) && (Irp->IoStatus.Information != 0)) {
-        TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_DEVICE, "%!FUNC! instanceId: %ws", (PWCHAR)Irp->IoStatus.Information);
+    PDEVICE_OBJECT targetDevice = IoAttachDeviceToDeviceStack(childFilterDevice, ChildDevice);
+    if (targetDevice == NULL) {
+        TraceEvents(TRACE_LEVEL_ERROR, TRACE_DEVICE, "%!FUNC! IoAttachDeviceToDeviceStack returned NULL");
+        IoDeleteDevice(childFilterDevice);
+        WdfWaitLockRelease(driverContext->ChildDeviceLock);
+        return FALSE;
     }
-    IoFreeIrp(Irp);
+    childDeviceContext->LowerDeviceObject = targetDevice;
 
-    PIRP OriginalIrp = (PIRP)Context;
-    if (OriginalIrp->PendingReturned) {
-        TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_DEVICE, "%!FUNC! pending");
-        IoMarkIrpPending(OriginalIrp);
+    childFilterDevice->Flags |= (targetDevice->Flags & (DO_BUFFERED_IO | DO_DIRECT_IO | DO_POWER_PAGABLE));
+    childFilterDevice->Flags &= ~DO_DEVICE_INITIALIZING;
+
+    WDF_OBJECT_ATTRIBUTES attributes;
+    WDF_OBJECT_ATTRIBUTES_INIT_CONTEXT_TYPE(&attributes, CHILD_OBJECT_CONTEXT);
+    attributes.ParentObject = driverContext->ChildDeviceCollection;
+
+    WDFOBJECT childObject;
+    status = WdfObjectCreate(&attributes, &childObject);
+    if (!NT_SUCCESS(status)) {
+        TraceEvents(TRACE_LEVEL_ERROR, TRACE_DEVICE, "%!FUNC! WdfObjectCreate failed %!STATUS!", status);
+        IoDetachDevice(targetDevice);
+        IoDeleteDevice(childFilterDevice);
+        WdfWaitLockRelease(driverContext->ChildDeviceLock);
+        return FALSE;
     }
-    IoCompleteRequest(OriginalIrp, IO_NO_INCREMENT);
 
-    return STATUS_CONTINUE_COMPLETION;
+    PCHILD_OBJECT_CONTEXT childObjectContext = WdfObjectGetContext(childObject);
+    childObjectContext->ChildDevice = ChildDevice;
+
+    status = WdfCollectionAdd(driverContext->ChildDeviceCollection, childObject);
+    if (!NT_SUCCESS(status)) {
+        TraceEvents(TRACE_LEVEL_ERROR, TRACE_DEVICE, "%!FUNC! WdfCollectionAdd failed %!STATUS!", status);
+        WdfObjectDelete(childObject);
+        IoDetachDevice(targetDevice);
+        IoDeleteDevice(childFilterDevice);
+        WdfWaitLockRelease(driverContext->ChildDeviceLock);
+        return FALSE;
+    }
+
+    WdfWaitLockRelease(driverContext->ChildDeviceLock);
+    return TRUE;
 }
-#endif
 
 
 static NTSTATUS SendSynchronousQueryId(WDFDEVICE Device, PDEVICE_OBJECT pdo);
@@ -208,11 +183,15 @@ static VOID EvtWorkItemCallback(WDFWORKITEM WorkItem) {
 
     TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_DEVICE, "%!FUNC! relations count = %lu", relations->Count);
 
+    WDFDEVICE device = (WDFDEVICE)WdfWorkItemGetParentObject(WorkItem);
+    WDFDRIVER driver = WdfDeviceGetDriver(device);
+
     for (ULONG i = 0; i < relations->Count; i++) {
         PDEVICE_OBJECT pdo = relations->Objects[i];
         if (pdo != NULL) {
             TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_DEVICE, "%!FUNC! found child PDO at index %u: %p", i, pdo);
-            (void)SendSynchronousQueryId((WDFDEVICE)WdfWorkItemGetParentObject(WorkItem), pdo);
+            (void)SendSynchronousQueryId(device, pdo);
+            (void)AddChildToCollection(driver, pdo);
         }
     }
 
@@ -243,16 +222,6 @@ static NTSTATUS HubBusRelationsCompletion(PDEVICE_OBJECT DeviceObject, PIRP Irp,
 
     TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_DEVICE, "%!FUNC! scheduling worker");
 
-#if false
-//    if (relations->Count == 0) {
-        if (Irp->PendingReturned) {
-            TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_DEVICE, "%!FUNC! pending");
-            IoMarkIrpPending(Irp);
-        }
-        return STATUS_CONTINUE_COMPLETION;
-//    }
-#endif
-
     WDF_WORKITEM_CONFIG workItemConfig;
     WDF_WORKITEM_CONFIG_INIT(&workItemConfig, EvtWorkItemCallback);
 
@@ -277,37 +246,18 @@ static NTSTATUS HubBusRelationsCompletion(PDEVICE_OBJECT DeviceObject, PIRP Irp,
     WdfWorkItemEnqueue(workItem);
 
     return STATUS_MORE_PROCESSING_REQUIRED;
-
-#if false
-    // TEST: Relay an additional IRP to the first child PDO before completing this IRP.
-    PIRP newIrp = IoAllocateIrp(relations->Objects[0]->StackSize, FALSE);
-    if (newIrp == NULL) {
-        TraceEvents(TRACE_LEVEL_ERROR, TRACE_DEVICE, "IoAllocateIrp failed");
-        Irp->IoStatus.Status = STATUS_INSUFFICIENT_RESOURCES;
-        if (Irp->PendingReturned) {
-            TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_DEVICE, "%!FUNC! pending");
-            IoMarkIrpPending(Irp);
-        }
-        return STATUS_CONTINUE_COMPLETION;
-    }
-
-    PIO_STACK_LOCATION NextStack = IoGetNextIrpStackLocation(newIrp);
-    NextStack->MajorFunction = IRP_MJ_PNP;
-    NextStack->MinorFunction = IRP_MN_QUERY_ID;
-    NextStack->Parameters.QueryId.IdType = BusQueryInstanceID;
-    IoSetCompletionRoutine(newIrp, QueryIdCompletion, Irp, TRUE, TRUE, TRUE);
-
-    IoCallDriver(relations->Objects[0], newIrp);
-
-    return STATUS_MORE_PROCESSING_REQUIRED;
-#endif
 }
 
 
-static NTSTATUS HubQueryDeviceRelations(_In_ WDFDEVICE Device, _Inout_ PIRP Irp) {
-    PIO_STACK_LOCATION irpStack = IoGetCurrentIrpStackLocation(Irp);
+static EVT_WDFDEVICE_WDM_IRP_PREPROCESS HubQueryDeviceRelations;
+#pragma alloc_text(PAGE, HubQueryDeviceRelations)
+_Use_decl_annotations_
+static NTSTATUS HubQueryDeviceRelations(WDFDEVICE Device, PIRP Irp) {
+    PAGED_CODE();
 
     TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_DEVICE, "%!FUNC!");
+
+    PIO_STACK_LOCATION irpStack = IoGetCurrentIrpStackLocation(Irp);
 
     if (irpStack->Parameters.QueryDeviceRelations.Type != BusRelations) {
         TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_DEVICE, "%!FUNC! OtherRelations");
@@ -340,9 +290,9 @@ static void HubDeviceContextCleanup(WDFOBJECT Device) {
     PDRIVER_CONTEXT driverContext = DriverGetContext(driver);
     (void)WdfWaitLockAcquire(driverContext->HubDeviceLock, NULL);
     driverContext->HubDeviceCount--;
-    TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_DEVICE, "HubDeviceCount is now %d.", driverContext->HubDeviceCount);
+    TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_DEVICE, "%!FUNC! HubDeviceCount is now %d.", driverContext->HubDeviceCount);
     if ((driverContext->HubDeviceCount == 0) && (driverContext->ControlDevice != NULL)) {
-        TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_DEVICE, "Deleting control device.");
+        TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_DEVICE, "%!FUNC! Deleting control device.");
         WdfObjectDelete(driverContext->ControlDevice);
         driverContext->ControlDevice = NULL;
     }
@@ -377,14 +327,14 @@ NTSTATUS HubCreateDevice(WDFDRIVER Driver, PWDFDEVICE_INIT DeviceInit) {
     UCHAR minorCode = IRP_MN_QUERY_DEVICE_RELATIONS;
     NTSTATUS status = WdfDeviceInitAssignWdmIrpPreprocessCallback(DeviceInit, HubQueryDeviceRelations, IRP_MJ_PNP, &minorCode, 1);
     if (!NT_SUCCESS(status)) {
-        TraceEvents(TRACE_LEVEL_ERROR, TRACE_DEVICE, "WdfDeviceInitAssignWdmIrpPreprocessCallback failed %!STATUS!", status);
+        TraceEvents(TRACE_LEVEL_ERROR, TRACE_DEVICE, "%!FUNC! WdfDeviceInitAssignWdmIrpPreprocessCallback failed %!STATUS!", status);
         return status;
     }
 
     WDFDEVICE device;
     status = WdfDeviceCreate(&DeviceInit, &deviceAttributes, &device);
     if (!NT_SUCCESS(status)) {
-        TraceEvents(TRACE_LEVEL_ERROR, TRACE_DEVICE, "WdfDeviceCreate failed %!STATUS!", status);
+        TraceEvents(TRACE_LEVEL_ERROR, TRACE_DEVICE, "%!FUNC! WdfDeviceCreate failed %!STATUS!", status);
         return status;
     }
 
@@ -401,10 +351,10 @@ NTSTATUS HubCreateDevice(WDFDRIVER Driver, PWDFDEVICE_INIT DeviceInit) {
     PDRIVER_CONTEXT driverContext = DriverGetContext(Driver);
     (void)WdfWaitLockAcquire(driverContext->HubDeviceLock, NULL);
     driverContext->HubDeviceCount++;
-    TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_DEVICE, "HubDeviceCount is now %d.", driverContext->HubDeviceCount);
+    TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_DEVICE, "%!FUNC! HubDeviceCount is now %d.", driverContext->HubDeviceCount);
     if (driverContext->ControlDevice == NULL) {
         status = ControlCreateDevice(Driver);
-        TraceEvents(TRACE_LEVEL_ERROR, TRACE_DEVICE, "ControlCreateDevice status %!STATUS!", status);
+        TraceEvents(TRACE_LEVEL_ERROR, TRACE_DEVICE, "%!FUNC! ControlCreateDevice status %!STATUS!", status);
         // Too bad if this fails, but we will continue. The control device will not be available, but the filter device will still load correctly.
     }
     WdfWaitLockRelease(driverContext->HubDeviceLock);
