@@ -133,6 +133,16 @@ NTSTATUS DriverEntry(PDRIVER_OBJECT DriverObject, PUNICODE_STRING RegistryPath) 
     }
     driverContext->HubDeviceCount = 0;
     driverContext->ControlDevice = NULL;
+    status = WdfWaitLockCreate(WDF_NO_OBJECT_ATTRIBUTES, &driverContext->ChildDeviceLock);
+    if (!NT_SUCCESS(status)) {
+        TraceEvents(TRACE_LEVEL_ERROR, TRACE_DRIVER, "WdfWaitLockCreate failed %!STATUS!", status);
+        return status;
+    }
+    status = WdfCollectionCreate(WDF_NO_OBJECT_ATTRIBUTES, &driverContext->ChildDeviceCollection);
+    if (!NT_SUCCESS(status)) {
+        TraceEvents(TRACE_LEVEL_ERROR, TRACE_DRIVER, "WdfCollectionCreate failed %!STATUS!", status);
+        return status;
+    }
     driverContext->GlobalTestCounter = 0;
     for (ULONG i = 0; i <= IRP_MJ_MAXIMUM_FUNCTION; i++) {
         driverContext->WdfDispatch[i] = DriverObject->MajorFunction[i];

@@ -6,6 +6,11 @@
 
 #include "stdafx.h"
 
+typedef struct _CHILD_OBJECT_CONTEXT {
+    PDEVICE_OBJECT ChildDevice;
+} CHILD_OBJECT_CONTEXT, * PCHILD_OBJECT_CONTEXT;
+
+WDF_DECLARE_CONTEXT_TYPE_WITH_NAME(CHILD_OBJECT_CONTEXT, WdfObjectGetContext)
 
 //
 // This is a singleton object shared by all devices.
@@ -16,6 +21,9 @@ typedef struct _DRIVER_CONTEXT {
     WDFWAITLOCK HubDeviceLock;
     LONG HubDeviceCount;
     WDFDEVICE ControlDevice;
+
+    WDFWAITLOCK ChildDeviceLock;
+    WDFCOLLECTION ChildDeviceCollection;  // Collection of CHILD_OBJECT_CONTEXT objects
 
     int GlobalTestCounter;
 } DRIVER_CONTEXT, * PDRIVER_CONTEXT;
