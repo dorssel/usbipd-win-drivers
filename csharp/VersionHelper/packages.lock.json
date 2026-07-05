@@ -4,9 +4,9 @@
     "net10.0": {
       "GitVersion.MsBuild": {
         "type": "Direct",
-        "requested": "[6.7.0, )",
-        "resolved": "6.7.0",
-        "contentHash": "0W5NHnfnogX0pfidRcJfqzfb8Yc/avBfq1qVuaHiHIjbtsjKHt9IFtt18p/ttCCeJlJe9fQliQ3pSkZQcibXlw=="
+        "requested": "[6.8.1, )",
+        "resolved": "6.8.1",
+        "contentHash": "x3lIU/s5zFuacWETug6PmeAo0lDXjYjEVWq5OPEQy4FXxbc6MrW/4/+4Ewvmgxsakd8IHvcQPhthYJ4KDg0Tww=="
       },
       "System.CodeDom": {
         "type": "Direct",
