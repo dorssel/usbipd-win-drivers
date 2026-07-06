@@ -23,7 +23,7 @@ updates:
   - package-ecosystem: nuget
     directories:
       - /
-      - /c
+      - /**/dependabot
     schedule:
       interval: daily
     groups:
