@@ -11,9 +11,9 @@ SPDX-License-Identifier: GPL-3.0-only
     <PackageVersion Include="System.CodeDom" Version="10.0.9" />
 
     <!-- c -->
-    <PackageVersion Include="Microsoft.Windows.SDK.CPP" Version="10.0.28000.1839" />
-    <PackageVersion Include="Microsoft.Windows.SDK.CPP.arm64" Version="10.0.28000.1839" />
-    <PackageVersion Include="Microsoft.Windows.SDK.CPP.x64" Version="10.0.28000.1839" />
+    <PackageVersion Include="Microsoft.Windows.SDK.CPP" Version="10.0.28000.2270" />
+    <PackageVersion Include="Microsoft.Windows.SDK.CPP.arm64" Version="10.0.28000.2270" />
+    <PackageVersion Include="Microsoft.Windows.SDK.CPP.x64" Version="10.0.28000.2270" />
     <PackageVersion Include="Microsoft.Windows.WDK.ARM64" Version="10.0.28000.1839" />
     <PackageVersion Include="Microsoft.Windows.WDK.x64" Version="10.0.28000.1839" />
   </ItemGroup>
