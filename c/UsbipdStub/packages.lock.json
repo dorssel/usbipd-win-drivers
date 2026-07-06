@@ -4,26 +4,26 @@
     "native,Version=v0.0": {
       "Microsoft.Windows.SDK.CPP": {
         "type": "Direct",
-        "requested": "[10.0.28000.1839, )",
-        "resolved": "10.0.28000.1839",
-        "contentHash": "ZWpdIQO44MmWRTWSwf2Ei6N0S3UPngmi9qBYsrxV8xk0ApiTIbcsfMbyJr2EKjmfKUVbn6ACTtxkcYmbhPxrjw=="
+        "requested": "[10.0.28000.2270, )",
+        "resolved": "10.0.28000.2270",
+        "contentHash": "Ao1+SSlLsnigqrY693VjqPl0ZlpiMPDiTNYBZpPi6HEVj9IVBCGDnRrpL7XLlDyYqwQh+xXSJYko4fMga07zSQ=="
       },
       "Microsoft.Windows.SDK.CPP.arm64": {
         "type": "Direct",
-        "requested": "[10.0.28000.1839, )",
-        "resolved": "10.0.28000.1839",
-        "contentHash": "kdhROBV1oDT5YMoa/ynuDo/4LfsqA5g9zfHtM14vHypKfhxsPCmYRkHfwFDokabWbn99Me1pjLzwm9NLfjB8pQ==",
+        "requested": "[10.0.28000.2270, )",
+        "resolved": "10.0.28000.2270",
+        "contentHash": "H7T/fbfdtcllmpI+3ac8pAAR77otZ5kUF0RTkLutUS6F7QVI059bbUasM9LtX2WvoY1ENbGk+OwvcJH1zwI8yw==",
         "dependencies": {
-          "Microsoft.Windows.SDK.cpp": "[10.0.28000.1839]"
+          "Microsoft.Windows.SDK.cpp": "[10.0.28000.2270]"
         }
       },
       "Microsoft.Windows.SDK.CPP.x64": {
         "type": "Direct",
-        "requested": "[10.0.28000.1839, )",
-        "resolved": "10.0.28000.1839",
-        "contentHash": "Z7uFWJLP+MbtyyV1wqlH54h1c2DUJ8amv/5/NagXi3c32xs15f0IVhZL2ksgTUT25XoDrtnvH5UIn5nFvkw+mQ==",
+        "requested": "[10.0.28000.2270, )",
+        "resolved": "10.0.28000.2270",
+        "contentHash": "DY0F4D9Iy8Bch+ZQRaSPYweNpjo/PF/eyzxb9T78ACzPTVRtl7+Wh8umncMuWyyQVJTQHrnX65STqhU0v7wURQ==",
         "dependencies": {
-          "Microsoft.Windows.SDK.cpp": "[10.0.28000.1839]"
+          "Microsoft.Windows.SDK.cpp": "[10.0.28000.2270]"
         }
       },
       "Microsoft.Windows.WDK.ARM64": {
