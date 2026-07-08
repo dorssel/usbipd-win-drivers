@@ -23,7 +23,7 @@ static NTSTATUS ChildDispatchStubPnp(PDEVICE_OBJECT DeviceObject, PIRP Irp) {
     PIO_STACK_LOCATION stackLocation = IoGetCurrentIrpStackLocation(Irp);
 
     static DECLARE_CONST_UNICODE_STRING(deviceIdStr, L"USB\\VID_1209&PID_8251");
-    static DECLARE_CONST_UNICODE_STRING(deviceTextStr, L"USBIP Shared Device");
+    static DECLARE_CONST_UNICODE_STRING(deviceTextStr, L"USB/IP Shared Device");
 
     switch (stackLocation->MinorFunction) {
     case IRP_MN_QUERY_ID:

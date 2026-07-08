@@ -17,10 +17,10 @@ DefaultDestDir = 13
 UsbipdStub.sys = 1,,
 
 [Manufacturer]
-%ManufacturerName% = Standard,nt$ARCH$.10.0...16299
+%ManufacturerName% = Standard,nt$ARCH$.10.0...17763
 
-[Standard.nt$ARCH$.10.0...16299]
-%DeviceDescription% = UsbipdStub_Install,USB\VID_vvvv&PID_pppp
+[Standard.nt$ARCH$.10.0...17763]
+%DeviceDescription% = UsbipdStub_Install,USB\VID_1209&PID_8251
 
 [UsbipdStub_Install.nt$ARCH$]
 CopyFiles = UsbipdStub_Install_Files
@@ -32,9 +32,9 @@ UsbipdStub.sys
 AddReg = UsbipdStub_Install_AddReg
 
 [UsbipdStub_Install_AddReg]
-; By default, USBDevice class uses iProduct descriptor to name the device
-; Uncomment for this device to use %DeviceDescription%
-;HKR,,FriendlyName,,%DeviceDescription%
+HKR,,FriendlyName,,%DeviceDescription%
+; Allow Generic-All access to local SYstem and Built-in Administrators, Generic-Read to Authenticated Users.
+HKR,,Security,,"D:P(A;;GA;;;SY)(A;;GA;;;BA)(A;;GR;;;AU)"
 
 [UsbipdStub_Install.nt$ARCH$.Services]
 AddService = UsbipdStub,%SPSVCINST_ASSOCSERVICE%,UsbipdStub_Install_Service
@@ -55,6 +55,6 @@ KmdfLibraryVersion = $KMDFVERSION$
 [Strings]
 SPSVCINST_ASSOCSERVICE = 0x00000002
 ManufacturerName = "Frans van Dorsselaer"
-DiskName = "UsbipdStub Installation Disk"
-DeviceDescription = "UsbipdStub Device"
-ServiceDescription = "UsbipdStub Service"
+DiskName = "USB/IP Stub Installation Disk"
+DeviceDescription = "USB/IP Shared Device"
+ServiceDescription = "USB/IP Stub Service"

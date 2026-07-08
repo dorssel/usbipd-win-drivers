@@ -61,6 +61,9 @@ SPDX-License-Identifier: GPL-3.0-only
     <ClCompile Include="stdafx.c">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="guids.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="generated\version.rc">
