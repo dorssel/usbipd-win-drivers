@@ -66,13 +66,13 @@ AddFilter=UsbipdHubFilter,0,UsbipdHubFilter_Install_Filter
 FilterPosition=Upper
 
 [UsbipdHubFilter_InstallLegacy.nt$ARCH$.HW]
-AddReg=UsbipdHubFilter_InstallLegacy_Registry
+AddReg=UsbipdHubFilter_InstallLegacy_Filter
 
-[UsbipdHubFilter_InstallLegacy_Registry]
+[UsbipdHubFilter_InstallLegacy_Filter]
 HKR,,"UpperFilters",0x00010008,"UsbipdHubFilter"
 
 [Strings]
 ManufacturerName = "Frans van Dorsselaer"
-DiskName = "UsbipdHubFilter Installation Disk"
-DeviceDescription = "UsbipdHubFilter Device"
-ServiceDescription = "UsbipdHubFilter Service"
+DiskName = "USB/IP Hub Filter Installation Disk"
+DeviceDescription = "USB/IP Hub Filter Device"
+ServiceDescription = "USB/IP Hub Filter Service"

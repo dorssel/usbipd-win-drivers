@@ -8,25 +8,40 @@
 #include "trace.h"
 #include "queue.tmh"
 
+#include "public.h"
 
-static EVT_WDF_IO_QUEUE_IO_DEVICE_CONTROL UsbipdStubEvtIoDeviceControl;
-static void UsbipdStubEvtIoDeviceControl(_In_ WDFQUEUE Queue, _In_ WDFREQUEST Request, _In_ size_t OutputBufferLength, _In_ size_t InputBufferLength,
-        _In_ ULONG IoControlCode) {
-    TraceEvents(TRACE_LEVEL_INFORMATION,
-                TRACE_QUEUE,
-                "%!FUNC! Queue 0x%p, Request 0x%p OutputBufferLength %d InputBufferLength %d IoControlCode %d",
-                Queue, Request, (int) OutputBufferLength, (int) InputBufferLength, IoControlCode);
+
+static EVT_WDF_IO_QUEUE_IO_DEVICE_CONTROL StubEvtIoDeviceControl;
+#pragma alloc_text(PAGE, StubEvtIoDeviceControl)
+_Use_decl_annotations_
+static void StubEvtIoDeviceControl(WDFQUEUE Queue, WDFREQUEST Request, size_t OutputBufferLength, size_t InputBufferLength, ULONG IoControlCode) {
+    UNREFERENCED_PARAMETER(Queue);
+    PAGED_CODE();
+
+    TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_QUEUE, "%!FUNC! IoControlCode 0x%08x OutputBufferLength %!Iu! InputBufferLength %!Iu! ",
+        IoControlCode, OutputBufferLength, InputBufferLength);
+
+    switch (IoControlCode) {
+    case IOCTL_USB_STUB_USER_TEST:
+    case IOCTL_USB_STUB_ADMIN_TEST:
+        break;
+
+    default:
+        WdfRequestComplete(Request, STATUS_INVALID_DEVICE_REQUEST);
+        return;
+    }
 
     WdfRequestComplete(Request, STATUS_SUCCESS);
 }
 
 
-static EVT_WDF_IO_QUEUE_IO_STOP UsbipdStubEvtIoStop;
-static void UsbipdStubEvtIoStop(_In_ WDFQUEUE Queue, _In_ WDFREQUEST Request, _In_ ULONG ActionFlags) {
-    TraceEvents(TRACE_LEVEL_INFORMATION,
-                TRACE_QUEUE,
-                "%!FUNC! Queue 0x%p, Request 0x%p ActionFlags %d",
-                Queue, Request, ActionFlags);
+static EVT_WDF_IO_QUEUE_IO_STOP StubEvtIoStop;
+#pragma alloc_text(PAGE, StubEvtIoStop)
+_Use_decl_annotations_
+static void StubEvtIoStop(WDFQUEUE Queue, WDFREQUEST Request, ULONG ActionFlags) {
+    PAGED_CODE();
+
+    TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_QUEUE, "%!FUNC! Queue 0x%p, Request 0x%p ActionFlags %d", Queue, Request, ActionFlags);
 
     //
     // In most cases, the EvtIoStop callback function completes, cancels, or postpones
@@ -54,30 +69,27 @@ static void UsbipdStubEvtIoStop(_In_ WDFQUEUE Queue, _In_ WDFREQUEST Request, _I
 }
 
 
-#pragma alloc_text(PAGE, UsbipdStubQueueInitialize)
-NTSTATUS UsbipdStubQueueInitialize(_In_ WDFDEVICE Device) {
-    WDFQUEUE queue;
-    NTSTATUS status;
-    WDF_IO_QUEUE_CONFIG    queueConfig;
-
+#pragma alloc_text(PAGE, StubQueueInitialize)
+_Use_decl_annotations_
+NTSTATUS StubQueueInitialize(WDFDEVICE Device) {
     PAGED_CODE();
 
-    //
-    // Configure a default queue so that requests that are not
-    // configure-forwarded using WdfDeviceConfigureRequestDispatching to go to
-    // other queues get dispatched here.
-    //
-    WDF_IO_QUEUE_CONFIG_INIT_DEFAULT_QUEUE(&queueConfig, WdfIoQueueDispatchParallel);
+    TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_QUEUE, "%!FUNC! Entry");
 
-    queueConfig.EvtIoDeviceControl = UsbipdStubEvtIoDeviceControl;
-    queueConfig.EvtIoStop = UsbipdStubEvtIoStop;
+    WDF_IO_QUEUE_CONFIG queueConfig;
+    WDF_IO_QUEUE_CONFIG_INIT_DEFAULT_QUEUE(&queueConfig, WdfIoQueueDispatchSequential);
+    queueConfig.EvtIoDeviceControl = StubEvtIoDeviceControl;
+    queueConfig.EvtIoStop = StubEvtIoStop;
 
-    status = WdfIoQueueCreate(Device, &queueConfig, WDF_NO_OBJECT_ATTRIBUTES, &queue);
+    WDF_OBJECT_ATTRIBUTES queueAttributes;
+    WDF_OBJECT_ATTRIBUTES_INIT(&queueAttributes);
+    queueAttributes.ExecutionLevel = WdfExecutionLevelPassive;
 
+    NTSTATUS status = WdfIoQueueCreate(Device, &queueConfig, &queueAttributes, WDF_NO_HANDLE);
     if (!NT_SUCCESS(status)) {
         TraceEvents(TRACE_LEVEL_ERROR, TRACE_QUEUE, "WdfIoQueueCreate failed %!STATUS!", status);
         return status;
     }
 
-    return status;
+    return STATUS_SUCCESS;
 }

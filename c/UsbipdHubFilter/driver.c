@@ -12,12 +12,13 @@
 #include "child_device.h"
 
 
-static EVT_WDF_OBJECT_CONTEXT_CLEANUP FilterEvtDriverContextCleanup;
-#pragma alloc_text(PAGE, FilterEvtDriverContextCleanup)
+static EVT_WDF_OBJECT_CONTEXT_CLEANUP DriverContextCleanup;
+#pragma alloc_text(PAGE, DriverContextCleanup)
 _Use_decl_annotations_
-static void FilterEvtDriverContextCleanup(WDFOBJECT DriverObject) {
+static void DriverContextCleanup(WDFOBJECT DriverObject) {
     UNREFERENCED_PARAMETER(DriverObject);
     PAGED_CODE();
+
     TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_DRIVER, "%!FUNC! Entry");
 
     WPP_CLEANUP(WdfDriverWdmGetDriverObject((WDFDRIVER)DriverObject));
@@ -89,6 +90,8 @@ static NTSTATUS DriverDispatch(PDEVICE_OBJECT DeviceObject, PIRP Irp) {
 #pragma alloc_text(INIT, DriverEntry)
 _Use_decl_annotations_
 NTSTATUS DriverEntry(PDRIVER_OBJECT DriverObject, PUNICODE_STRING RegistryPath) {
+    PAGED_CODE();
+
     //
     // Required for POOL_ZERO_DOWN_LEVEL_SUPPORT (< Windows 10 2004). We do not need POOL_NX_OPTIN (< Windows 8).
     // Must be called before anything else.
@@ -107,7 +110,7 @@ NTSTATUS DriverEntry(PDRIVER_OBJECT DriverObject, PUNICODE_STRING RegistryPath) 
     //
     WDF_OBJECT_ATTRIBUTES driverAttributes;
     WDF_OBJECT_ATTRIBUTES_INIT_CONTEXT_TYPE(&driverAttributes, DRIVER_CONTEXT);
-    driverAttributes.EvtCleanupCallback = FilterEvtDriverContextCleanup;
+    driverAttributes.EvtCleanupCallback = DriverContextCleanup;
 
     WDF_DRIVER_CONFIG config;
     WDF_DRIVER_CONFIG_INIT(&config, HubCreateDevice);
@@ -120,7 +123,7 @@ NTSTATUS DriverEntry(PDRIVER_OBJECT DriverObject, PUNICODE_STRING RegistryPath) 
         WPP_CLEANUP(DriverObject);
         return status;
     }
-    // NOTE: Failure after this point can rely on FilterEvtDriverContextCleanup.
+    // NOTE: Failure after this point can rely on DriverContextCleanup.
 
     //
     // Initialize the context.

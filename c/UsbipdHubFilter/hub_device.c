@@ -302,9 +302,6 @@ static void HubDeviceContextCleanup(WDFOBJECT Device) {
 }
 
 
-/// <summary>
-/// This is the EvtDeviceAdd callback function that creates and initializes a new instance of the device each time one is enumerated by the PnP manager.
-/// </summary>
 #pragma alloc_text(PAGE, HubCreateDevice)
 _Use_decl_annotations_
 NTSTATUS HubCreateDevice(WDFDRIVER Driver, PWDFDEVICE_INIT DeviceInit) {
