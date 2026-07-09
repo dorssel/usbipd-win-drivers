@@ -1,0 +1,19 @@
+// SPDX-FileCopyrightText: 2026 Frans van Dorsselaer
+//
+// SPDX-License-Identifier: GPL-3.0-only
+
+FILE_DEVICE_UNKNOWN
+
+FILE_ACCESS_RIGHTS
+GENERIC_ACCESS_RIGHTS
+
+FILE_ANY_ACCESS
+FILE_WRITE_ACCESS
+
+METHOD_BUFFERED
+
+CreateFile
+DeviceIoControl
+
+CM_Get_Device_Interface_List
+CM_Get_Device_Interface_List_Size
