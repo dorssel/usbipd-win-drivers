@@ -10,13 +10,14 @@
 
 #include "control_queue.h"
 #include "driver.h"
+#include "public.h"
 
 
 #pragma alloc_text(PAGE, ControlCreateDevice)
 _Use_decl_annotations_
 NTSTATUS ControlCreateDevice(WDFDRIVER driver) {
-    static DECLARE_CONST_UNICODE_STRING(deviceName, L"\\Device\\UsbipdHubFilter");
-    static DECLARE_CONST_UNICODE_STRING(deviceSymbolicLinkName, L"\\DosDevices\\UsbipdHubFilter");
+    static DECLARE_CONST_UNICODE_STRING(deviceName, L"\\Device\\" USB_HUB_FILTER_NAME);
+    static DECLARE_CONST_UNICODE_STRING(deviceSymbolicLinkName, L"\\DosDevices\\" USB_HUB_FILTER_NAME);
 
     PAGED_CODE();
 
