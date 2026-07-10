@@ -14,7 +14,9 @@ static class Interop
     /// <summary>UsbipdHubFilter: public.h</summary>
     internal enum IOCTL_USB_HUB_FILTER : uint
     {
-        TEST = (PInvoke.FILE_DEVICE_UNKNOWN << 16) | (PInvoke.FILE_ANY_ACCESS << 14) | (0x800 << 2) | PInvoke.METHOD_BUFFERED,
+        TEST_ANONYMOUS = (PInvoke.FILE_DEVICE_UNKNOWN << 16) | (PInvoke.FILE_ANY_ACCESS << 14) | (0x800 << 2) | PInvoke.METHOD_BUFFERED,
+        TEST_USER = (PInvoke.FILE_DEVICE_UNKNOWN << 16) | (PInvoke.FILE_READ_ACCESS << 14) | (0x801 << 2) | PInvoke.METHOD_BUFFERED,
+        TEST_ADMIN = (PInvoke.FILE_DEVICE_UNKNOWN << 16) | (PInvoke.FILE_WRITE_ACCESS << 14) | (0x802 << 2) | PInvoke.METHOD_BUFFERED,
     }
 
     /// <summary>UsbipdStub: public.h</summary>
@@ -23,7 +25,8 @@ static class Interop
     /// <summary>UsbipdStub: public.h</summary>
     internal enum IOCTL_USB_STUB : uint
     {
-        USER_TEST = (PInvoke.FILE_DEVICE_UNKNOWN << 16) | (PInvoke.FILE_ANY_ACCESS << 14) | (0x800 << 2) | PInvoke.METHOD_BUFFERED,
-        ADMIN_TEST = (PInvoke.FILE_DEVICE_UNKNOWN << 16) | (PInvoke.FILE_WRITE_ACCESS << 14) | (0x801 << 2) | PInvoke.METHOD_BUFFERED,
+        TEST_ANONYMOUS = (PInvoke.FILE_DEVICE_UNKNOWN << 16) | (PInvoke.FILE_ANY_ACCESS << 14) | (0x800 << 2) | PInvoke.METHOD_BUFFERED,
+        TEST_USER = (PInvoke.FILE_DEVICE_UNKNOWN << 16) | (PInvoke.FILE_READ_ACCESS << 14) | (0x801 << 2) | PInvoke.METHOD_BUFFERED,
+        TEST_ADMIN = (PInvoke.FILE_DEVICE_UNKNOWN << 16) | (PInvoke.FILE_WRITE_ACCESS << 14) | (0x802 << 2) | PInvoke.METHOD_BUFFERED,
     }
 }

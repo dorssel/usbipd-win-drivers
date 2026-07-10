@@ -8,6 +8,7 @@ SPDX-License-Identifier: GPL-3.0-only
   <PropertyGroup>
     <OutputType>Exe</OutputType>
     <!-- Only for Windows 10 1809 or later -->
+    <Platforms>ARM64;x64</Platforms>
     <TargetPlatformIdentifier>Windows</TargetPlatformIdentifier>
     <TargetPlatformVersion>10.0.17763.0</TargetPlatformVersion>
     <TargetPlatformMinVersion>10.0.17763.0</TargetPlatformMinVersion>

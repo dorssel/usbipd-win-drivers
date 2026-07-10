@@ -22,8 +22,9 @@ static void StubEvtIoDeviceControl(WDFQUEUE Queue, WDFREQUEST Request, size_t Ou
         IoControlCode, OutputBufferLength, InputBufferLength);
 
     switch (IoControlCode) {
-    case IOCTL_USB_STUB_USER_TEST:
-    case IOCTL_USB_STUB_ADMIN_TEST:
+    case IOCTL_USB_STUB_TEST_ANONYMOUS:
+    case IOCTL_USB_STUB_TEST_USER:
+    case IOCTL_USB_STUB_TEST_ADMIN:
         break;
 
     default:

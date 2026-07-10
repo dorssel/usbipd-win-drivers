@@ -38,6 +38,8 @@ SPDX-License-Identifier: GPL-3.0-only
   </Project>
   <Project Path="csharp/TestTool/TestTool.csproj">
     <BuildDependency Project="csharp/VersionHelper/VersionHelper.csproj" />
+    <Platform Solution="*|ARM64" Project="ARM64" />
+    <Platform Solution="*|x64" Project="x64" />
   </Project>
   <Project Path="csharp/VersionHelper/VersionHelper.csproj" />
 </Solution>
