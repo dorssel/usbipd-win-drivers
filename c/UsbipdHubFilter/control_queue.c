@@ -28,12 +28,18 @@ static void ControlEvtIoDeviceControl(WDFQUEUE Queue, WDFREQUEST Request, size_t
 
     NTSTATUS status;
     switch (IoControlCode) {
-    case IOCTL_USB_HUB_FILTER_TEST:
+    case IOCTL_USB_HUB_FILTER_TEST_ANONYMOUS:
+    case IOCTL_USB_HUB_FILTER_TEST_USER:
+        TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_CONTROL_QUEUE, "Got IOCTL_USB_HUB_FILTER_TEST_* from user mode");
+        status = STATUS_SUCCESS;
+        break;
+
+    case IOCTL_USB_HUB_FILTER_TEST_ADMIN:
     {
         WDFDEVICE device = WdfIoQueueGetDevice(Queue);
         PDRIVER_CONTEXT driverContext = DriverGetContext(WdfDeviceGetDriver(device));
 
-        TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_CONTROL_QUEUE, "Got IOCTL_USB_HUB_FILTER_TEST from user mode, current value: %d",
+        TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_CONTROL_QUEUE, "Got IOCTL_USB_HUB_FILTER_TEST_ADMIN from user mode, current value: %d",
             (int)driverContext->GlobalTestCounter);
         driverContext->GlobalTestCounter++;
         status = STATUS_SUCCESS;

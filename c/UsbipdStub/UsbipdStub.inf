@@ -33,8 +33,6 @@ AddReg = UsbipdStub_Install_AddReg
 
 [UsbipdStub_Install_AddReg]
 HKR,,FriendlyName,,%DeviceDescription%
-; Allow Generic-All access to local SYstem and Built-in Administrators, Generic-Read to Authenticated Users.
-HKR,,Security,,"D:P(A;;GA;;;SY)(A;;GA;;;BA)(A;;GR;;;AU)"
 
 [UsbipdStub_Install.nt$ARCH$.Services]
 AddService = UsbipdStub,%SPSVCINST_ASSOCSERVICE%,UsbipdStub_Install_Service

@@ -18,6 +18,7 @@ _Use_decl_annotations_
 NTSTATUS ControlCreateDevice(WDFDRIVER driver) {
     static DECLARE_CONST_UNICODE_STRING(deviceName, L"\\Device\\" USB_HUB_FILTER_NAME);
     static DECLARE_CONST_UNICODE_STRING(deviceSymbolicLinkName, L"\\DosDevices\\" USB_HUB_FILTER_NAME);
+    static DECLARE_CONST_UNICODE_STRING(securityDescriptor, L"D:P(A;;GA;;;SY)(A;;GA;;;BA)(A;;GR;;;AU)(A;;GX;;;WD)");
 
     PAGED_CODE();
 
@@ -30,6 +31,13 @@ NTSTATUS ControlCreateDevice(WDFDRIVER driver) {
     NTSTATUS status = WdfDeviceInitAssignName(deviceInit, &deviceName);
     if (!NT_SUCCESS(status)) {
         TraceEvents(TRACE_LEVEL_ERROR, TRACE_CONTROL_DEVICE, "WdfDeviceInitAssignName failed %!STATUS!", status);
+        WdfDeviceInitFree(deviceInit);
+        return status;
+    }
+
+    status = WdfDeviceInitAssignSDDLString(deviceInit, &securityDescriptor);
+    if (!NT_SUCCESS(status)) {
+        TraceEvents(TRACE_LEVEL_ERROR, TRACE_CONTROL_DEVICE, "%!FUNC! WdfDeviceInitAssignSDDLString failed %!STATUS!", status);
         WdfDeviceInitFree(deviceInit);
         return status;
     }

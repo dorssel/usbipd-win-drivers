@@ -3,7 +3,10 @@
 // SPDX-License-Identifier: GPL-3.0-only
 
 using System.ComponentModel;
+using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 using System.Runtime.InteropServices;
+using Microsoft.Win32.SafeHandles;
 using Windows.Win32;
 using Windows.Win32.Devices.DeviceAndDriverInstallation;
 using Windows.Win32.Foundation;
@@ -42,52 +45,88 @@ sealed class Program
     }
 
 
-    static void Main()
+    [StackTraceHidden]
+    [DoesNotReturn]
+    static void ThrowLastPInvokeError(string functionName)
     {
-        using var hubFilter = PInvoke.CreateFile(@"\\.\" + Interop.USB_HUB_FILTER_NAME, 0,
+        throw new Win32Exception(Marshal.GetLastPInvokeError(), $"{functionName}: {Marshal.GetLastPInvokeErrorMessage()}");
+    }
+
+
+    static SafeFileHandle OpenDevice(string path, GENERIC_ACCESS_RIGHTS desiredAccess)
+    {
+        var handle = PInvoke.CreateFile(path, (uint)desiredAccess,
             FILE_SHARE_MODE.FILE_SHARE_READ | FILE_SHARE_MODE.FILE_SHARE_WRITE,
             null, FILE_CREATION_DISPOSITION.OPEN_EXISTING, 0);
-
-        if (hubFilter.IsInvalid)
+        if (handle.IsInvalid)
         {
-            throw new Win32Exception(Marshal.GetLastWin32Error(), "CreateFile");
+            Console.WriteLine($"{nameof(PInvoke.CreateFile)}: {Marshal.GetLastPInvokeErrorMessage()}");
         }
+        return handle;
+    }
 
+
+    static bool IoControl<T>(SafeHandle device, T ioControlCode, ReadOnlySpan<byte> inBuffer = default,
+        Span<byte> outBuffer = default, bool exactOutput = true) where T : Enum
+    {
         unsafe // DevSkim: ignore DS172412
         {
-            if (!PInvoke.DeviceIoControl(hubFilter, (uint)Interop.IOCTL_USB_HUB_FILTER.TEST))
+            if (!PInvoke.DeviceIoControl(device, Convert.ToUInt32(ioControlCode), inBuffer, outBuffer, out var bytesReturned))
             {
-                throw new Win32Exception(Marshal.GetLastWin32Error(), "DeviceIoControl");
+                Console.WriteLine($"{nameof(PInvoke.DeviceIoControl)}: {Marshal.GetLastPInvokeErrorMessage()}");
+                return false;
             }
+            if (exactOutput && bytesReturned != outBuffer.Length)
+            {
+                Console.WriteLine($"Expected {outBuffer.Length} bytes, but got {bytesReturned} bytes.");
+                return false;
+            }
+        }
+        return true;
+    }
+
+    static void TestHubFilter(string entity, GENERIC_ACCESS_RIGHTS desiredAccess)
+    {
+        Console.WriteLine($"  As {entity}");
+        using var hubFilter = OpenDevice(@"\\.\" + Interop.USB_HUB_FILTER_NAME, desiredAccess);
+        if (!hubFilter.IsInvalid)
+        {
+            Console.WriteLine($"    Anonymous Call: {IoControl(hubFilter, Interop.IOCTL_USB_HUB_FILTER.TEST_ANONYMOUS)}");
+            Console.WriteLine($"    User Call: {IoControl(hubFilter, Interop.IOCTL_USB_HUB_FILTER.TEST_USER)}");
+            Console.WriteLine($"    Admin Call: {IoControl(hubFilter, Interop.IOCTL_USB_HUB_FILTER.TEST_ADMIN)}");
+        }
+    }
+
+
+    static void TestStub(string deviceInterface, string entity, GENERIC_ACCESS_RIGHTS desiredAccess)
+    {
+        Console.WriteLine($"  As {entity}");
+        using var stub = OpenDevice(deviceInterface, desiredAccess);
+        if (!stub.IsInvalid)
+        {
+            Console.WriteLine($"    Anonymous call: {IoControl(stub, Interop.IOCTL_USB_STUB.TEST_ANONYMOUS)}");
+            Console.WriteLine($"    User call: {IoControl(stub, Interop.IOCTL_USB_STUB.TEST_USER)}");
+            Console.WriteLine($"    Admin call: {IoControl(stub, Interop.IOCTL_USB_STUB.TEST_ADMIN)}");
+        }
+    }
+
+
+    static void Main()
+    {
+        {
+            Console.WriteLine("Testing Hub Filter:");
+            TestHubFilter("AnyOne", 0);
+            TestHubFilter("User", GENERIC_ACCESS_RIGHTS.GENERIC_READ);
+            TestHubFilter("Admin", GENERIC_ACCESS_RIGHTS.GENERIC_READ | GENERIC_ACCESS_RIGHTS.GENERIC_WRITE);
         }
 
         foreach (var deviceInterface in GetAllDeviceInterfaces(Interop.GUID_DEVINTERFACE_USBIPD_STUB))
         {
+            Console.WriteLine();
             Console.WriteLine($"Testing {deviceInterface}");
-            {
-                Console.WriteLine($"  As User");
-                using var stub = PInvoke.CreateFile(deviceInterface, 0,
-                    FILE_SHARE_MODE.FILE_SHARE_READ | FILE_SHARE_MODE.FILE_SHARE_WRITE,
-                    null, FILE_CREATION_DISPOSITION.OPEN_EXISTING, 0);
-
-                unsafe // DevSkim: ignore DS172412
-                {
-                    Console.WriteLine($"    User call: {(bool)PInvoke.DeviceIoControl(stub, (uint)Interop.IOCTL_USB_STUB.USER_TEST)}");
-                    Console.WriteLine($"    Admin call: {(bool)PInvoke.DeviceIoControl(stub, (uint)Interop.IOCTL_USB_STUB.ADMIN_TEST)}");
-                }
-            }
-            {
-                Console.WriteLine($"  As Admin");
-                using var stub = PInvoke.CreateFile(deviceInterface, (uint)GENERIC_ACCESS_RIGHTS.GENERIC_WRITE,
-                    FILE_SHARE_MODE.FILE_SHARE_READ | FILE_SHARE_MODE.FILE_SHARE_WRITE,
-                    null, FILE_CREATION_DISPOSITION.OPEN_EXISTING, 0);
-
-                unsafe // DevSkim: ignore DS172412
-                {
-                    Console.WriteLine($"    User call: {(bool)PInvoke.DeviceIoControl(stub, (uint)Interop.IOCTL_USB_STUB.USER_TEST)}");
-                    Console.WriteLine($"    Admin call: {(bool)PInvoke.DeviceIoControl(stub, (uint)Interop.IOCTL_USB_STUB.ADMIN_TEST)}");
-                }
-            }
+            TestStub(deviceInterface, "AnyOne", 0);
+            TestStub(deviceInterface, "User", GENERIC_ACCESS_RIGHTS.GENERIC_READ);
+            TestStub(deviceInterface, "Admin", GENERIC_ACCESS_RIGHTS.GENERIC_READ | GENERIC_ACCESS_RIGHTS.GENERIC_WRITE);
         }
 
         Console.WriteLine("Done");
