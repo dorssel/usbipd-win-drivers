@@ -10,6 +10,7 @@
 #include <initguid.h>
 #include <ntddk.h>
 #include <ntstrsafe.h>
+#include <usbioctl.h>
 #include <wdf.h>
 
 

@@ -25,12 +25,12 @@
 
 #if DBG
 // The In-Flight Recorder (IFR) by default never logs TRACE_LEVEL_VERBOSE.
-#define WPP_RECORDER_LEVEL_FLAGS_ARGS(lvl, flags) WPP_CONTROL(WPP_BIT_ ## flags).AutoLogContext, lvl, WPP_BIT_ ## flags
-#define WPP_RECORDER_LEVEL_FLAGS_FILTER(lvl, flags) (WPP_CONTROL(WPP_BIT_ ## flags).Level >= lvl)
+#define WPP_RECORDER_LEVEL_FLAGS_ARGS(level, flags) WPP_CONTROL(WPP_BIT_ ## flags).AutoLogContext, level, WPP_BIT_ ## flags
+#define WPP_RECORDER_LEVEL_FLAGS_FILTER(level, flags) (WPP_CONTROL(WPP_BIT_ ## flags).Level >= level)
 #endif
 
-#define WPP_LEVEL_FLAGS_LOGGER(level, flags) WPP_LEVEL_LOGGER(flag)
-#define WPP_LEVEL_FLAGS_ENABLED(level, flags) (WPP_LEVEL_ENABLED(flag) && WPP_CONTROL(WPP_BIT_ ## flag).Level >= level)
+#define WPP_LEVEL_FLAGS_LOGGER(level, flags) WPP_LEVEL_LOGGER(flags)
+#define WPP_LEVEL_FLAGS_ENABLED(level, flags) (WPP_LEVEL_ENABLED(flags) && WPP_CONTROL(WPP_BIT_ ## flags).Level >= level)
 
 //
 // This comment block is scanned by the trace preprocessor to define our Trace functions.

@@ -47,7 +47,7 @@ static void ControlEvtIoDeviceControl(WDFQUEUE Queue, WDFREQUEST Request, size_t
     }
 
     default:
-        TraceEvents(TRACE_LEVEL_WARNING, TRACE_CONTROL_QUEUE, "Invalid IOCTL request %ulx", IoControlCode);
+        TraceEvents(TRACE_LEVEL_WARNING, TRACE_CONTROL_QUEUE, "Invalid IOCTL request 0x%08lx", IoControlCode);
         status = STATUS_INVALID_DEVICE_REQUEST;
         break;
     }

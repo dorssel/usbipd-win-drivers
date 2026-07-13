@@ -114,6 +114,47 @@ static NTSTATUS ChildDispatchStubPnp(PDEVICE_OBJECT DeviceObject, PIRP Irp) {
 }
 
 
+static NTSTATUS ForcePortCycle(_In_ PDEVICE_OBJECT LowerDeviceObject);
+#pragma alloc_text(PAGE, ForcePortCycle)
+_Use_decl_annotations_
+static NTSTATUS ForcePortCycle(PDEVICE_OBJECT LowerDeviceObject) {
+    PAGED_CODE();
+
+    TraceEvents(TRACE_LEVEL_VERBOSE, TRACE_CHILD_DEVICE, "%!FUNC! Entry");
+
+    KEVENT event;
+    KeInitializeEvent(&event, NotificationEvent, FALSE);
+
+    IO_STATUS_BLOCK ioStatus;
+    PIRP irp = IoBuildDeviceIoControlRequest(IOCTL_INTERNAL_USB_CYCLE_PORT, LowerDeviceObject, NULL, 0, NULL, 0, TRUE, &event, &ioStatus);
+    if (irp == NULL) {
+        TraceEvents(TRACE_LEVEL_ERROR, TRACE_CHILD_DEVICE, "%!FUNC! IoBuildDeviceIoControlRequest failed");
+        return STATUS_INSUFFICIENT_RESOURCES;
+    }
+
+    NTSTATUS status = IoCallDriver(LowerDeviceObject, irp);
+    if (status == STATUS_PENDING) {
+        LARGE_INTEGER timeout = { .QuadPart  = -(LONGLONG)5 * 1000 * 1000 * 10 };  // 5s relative timeout
+        status = KeWaitForSingleObject(&event, Executive, KernelMode, FALSE, &timeout);
+        if (status == STATUS_TIMEOUT) {
+            TraceEvents(TRACE_LEVEL_WARNING, TRACE_CHILD_DEVICE, "%!FUNC! KeWaitForSingleObject timed out");
+            return STATUS_IO_TIMEOUT;
+        }
+        if (!NT_SUCCESS(status)) {
+            TraceEvents(TRACE_LEVEL_ERROR, TRACE_CHILD_DEVICE, "%!FUNC! KeWaitForSingleObject failed: 0x%08x", status);
+            return status;
+        }
+        status = ioStatus.Status;
+    }
+    if (!NT_SUCCESS(status)) {
+        TraceEvents(TRACE_LEVEL_ERROR, TRACE_CHILD_DEVICE, "%!FUNC! IoCallDriver failed: 0x%08x", status);
+        return status;
+    }
+
+    return STATUS_SUCCESS;
+}
+
+
 static DRIVER_DISPATCH ChildDispatchPnP;
 #pragma alloc_text(PAGE, ChildDispatchPnP)
 _Use_decl_annotations_
@@ -127,6 +168,11 @@ static NTSTATUS ChildDispatchPnP(PDEVICE_OBJECT DeviceObject, PIRP Irp) {
 
     if (stackLocation->MinorFunction == IRP_MN_REMOVE_DEVICE) {
         TraceEvents(TRACE_LEVEL_VERBOSE, TRACE_CHILD_DEVICE, "%!FUNC! IRP_MN_REMOVE_DEVICE");
+
+        // If the function driver was uninstalled, then PnP will remove us from the driver stack as well, but the PDO still exists.
+        // Therefore, we force a port cycle, such that the USB bus driver will create a fresh PDO and attach another instance of our lower filter.
+        // This is best effort, if it fails, we must still continue with the removal of our child device.
+        (void)ForcePortCycle(deviceContext->LowerDeviceObject);
 
         WDFDRIVER driver = WdfGetDriver();
         if (driver != NULL) {
