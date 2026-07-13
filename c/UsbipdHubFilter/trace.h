@@ -16,35 +16,26 @@
     WPP_DEFINE_CONTROL_GUID(                                                    \
         UsbipdHubFilterTraceGuid, (b4829bf1, 3240, 4fec, 8da3, 33acc7178415),   \
                                                                                 \
-        WPP_DEFINE_BIT(MYDRIVER_ALL_INFO)                                       \
         WPP_DEFINE_BIT(TRACE_DRIVER)                                            \
-        WPP_DEFINE_BIT(TRACE_DEVICE)                                            \
+        WPP_DEFINE_BIT(TRACE_HUB_DEVICE)                                        \
+        WPP_DEFINE_BIT(TRACE_CHILD_DEVICE)                                      \
         WPP_DEFINE_BIT(TRACE_CONTROL_DEVICE)                                    \
         WPP_DEFINE_BIT(TRACE_CONTROL_QUEUE)                                     \
         )
 
-#define WPP_FLAG_LEVEL_LOGGER(flag, level) WPP_LEVEL_LOGGER(flag)
+#if DBG
+// The In-Flight Recorder (IFR) by default never logs TRACE_LEVEL_VERBOSE.
+#define WPP_RECORDER_LEVEL_FLAGS_ARGS(level, flags) WPP_CONTROL(WPP_BIT_ ## flags).AutoLogContext, level, WPP_BIT_ ## flags
+#define WPP_RECORDER_LEVEL_FLAGS_FILTER(level, flags) (WPP_CONTROL(WPP_BIT_ ## flags).Level >= level)
+#endif
 
-#define WPP_FLAG_LEVEL_ENABLED(flag, level) (WPP_LEVEL_ENABLED(flag) && WPP_CONTROL(WPP_BIT_ ## flag).Level >= level)
-
-#define WPP_LEVEL_FLAGS_LOGGER(lvl, flags) WPP_LEVEL_LOGGER(flags)
-
-#define WPP_LEVEL_FLAGS_ENABLED(lvl, flags) (WPP_LEVEL_ENABLED(flags) && WPP_CONTROL(WPP_BIT_ ## flags).Level >= lvl)
-
-//
-// WPP orders static parameters before dynamic parameters. To support the Trace function
-// defined below which sets FLAGS=MYDRIVER_ALL_INFO, a custom macro must be defined to
-// reorder the arguments to what the .tpl configuration file expects.
-//
-#define WPP_RECORDER_FLAGS_LEVEL_ARGS(flags, lvl) WPP_RECORDER_LEVEL_FLAGS_ARGS(lvl, flags)
-#define WPP_RECORDER_FLAGS_LEVEL_FILTER(flags, lvl) WPP_RECORDER_LEVEL_FLAGS_FILTER(lvl, flags)
+#define WPP_LEVEL_FLAGS_LOGGER(level, flags) WPP_LEVEL_LOGGER(flags)
+#define WPP_LEVEL_FLAGS_ENABLED(level, flags) (WPP_LEVEL_ENABLED(flags) && WPP_CONTROL(WPP_BIT_ ## flags).Level >= level)
 
 //
-// This comment block is scanned by the trace preprocessor to define our
-// Trace function.
+// This comment block is scanned by the trace preprocessor to define our Trace functions.
 //
 // begin_wpp config
-// FUNC Trace{FLAGS=MYDRIVER_ALL_INFO}(LEVEL, MSG, ...);
 // FUNC TraceEvents(LEVEL, FLAGS, MSG, ...);
 // end_wpp
 //

@@ -28,7 +28,7 @@ static void DriverContextCleanup(WDFOBJECT DriverObject) {
 static DRIVER_DISPATCH DriverDispatch;
 _Use_decl_annotations_
 static NTSTATUS DriverDispatch(PDEVICE_OBJECT DeviceObject, PIRP Irp) {
-    TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_DRIVER, "%!FUNC! major function");
+    TraceEvents(TRACE_LEVEL_VERBOSE, TRACE_DRIVER, "%!FUNC! major function");
 
     PCHILD_DEVICE_CONTEXT deviceContext = (PCHILD_DEVICE_CONTEXT)DeviceObject->DeviceExtension;
     if (deviceContext == NULL) {
@@ -40,15 +40,15 @@ static NTSTATUS DriverDispatch(PDEVICE_OBJECT DeviceObject, PIRP Irp) {
     }
 
     if (deviceContext->Magic == CHILD_DEVICE_MAGIC) {
-        TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_DRIVER, "%!FUNC! for WDM Child");
+        TraceEvents(TRACE_LEVEL_VERBOSE, TRACE_DRIVER, "%!FUNC! for WDM Child");
         return ChildDispatch(DeviceObject, Irp);
     }
 
-    TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_DRIVER, "%!FUNC! for WDF Hub");
+    TraceEvents(TRACE_LEVEL_VERBOSE, TRACE_DRIVER, "%!FUNC! for WDF Hub");
 
     PIO_STACK_LOCATION irpStack = IoGetCurrentIrpStackLocation(Irp);
 
-    TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_DRIVER, "%!FUNC! for WDF Hub: 0x%02x", irpStack->MajorFunction);
+    TraceEvents(TRACE_LEVEL_VERBOSE, TRACE_DRIVER, "%!FUNC! for WDF Hub: 0x%02x", irpStack->MajorFunction);
 
     if (irpStack->MajorFunction > IRP_MJ_MAXIMUM_FUNCTION) {
         TraceEvents(TRACE_LEVEL_ERROR, TRACE_DRIVER, "%!FUNC! MajorFunction %d is out of range", irpStack->MajorFunction);
@@ -152,7 +152,7 @@ NTSTATUS DriverEntry(PDRIVER_OBJECT DriverObject, PUNICODE_STRING RegistryPath) 
         DriverObject->MajorFunction[i] = DriverDispatch;
     }
 
-    TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_DRIVER, "%!FUNC! Exit");
+    TraceEvents(TRACE_LEVEL_VERBOSE, TRACE_DRIVER, "%!FUNC! Exit");
 
     return STATUS_SUCCESS;
 }

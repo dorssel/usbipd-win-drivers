@@ -14,7 +14,7 @@
 
 
 BOOLEAN AddChildToCollection(WDFDRIVER Driver, PDEVICE_OBJECT ChildDevice) {
-    TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_DEVICE, "%!FUNC! Entry");
+    TraceEvents(TRACE_LEVEL_VERBOSE, TRACE_HUB_DEVICE, "%!FUNC! Entry");
 
     PDRIVER_CONTEXT driverContext = DriverGetContext(Driver);
 
@@ -23,7 +23,7 @@ BOOLEAN AddChildToCollection(WDFDRIVER Driver, PDEVICE_OBJECT ChildDevice) {
     for (ULONG i = 0; i < count; i++) {
         PCHILD_OBJECT_CONTEXT childObjectContext = WdfObjectGetContext(WdfCollectionGetItem(driverContext->ChildDeviceCollection, i));
         if (childObjectContext->ChildDevice == ChildDevice) {
-            TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_DEVICE, "%!FUNC! Child device %p is already in the collection", ChildDevice);
+            TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_HUB_DEVICE, "%!FUNC! Child device %p is already in the collection", ChildDevice);
             WdfWaitLockRelease(driverContext->ChildDeviceLock);
             return FALSE;
         }
@@ -33,7 +33,7 @@ BOOLEAN AddChildToCollection(WDFDRIVER Driver, PDEVICE_OBJECT ChildDevice) {
     NTSTATUS status = IoCreateDevice(WdfDriverWdmGetDriverObject(Driver), sizeof(CHILD_DEVICE_CONTEXT), NULL, FILE_DEVICE_UNKNOWN, 0, FALSE,
         &childFilterDevice);
     if (!NT_SUCCESS(status)) {
-        TraceEvents(TRACE_LEVEL_ERROR, TRACE_DEVICE, "%!FUNC! IoCreateDevice failed %!STATUS!", status);
+        TraceEvents(TRACE_LEVEL_ERROR, TRACE_HUB_DEVICE, "%!FUNC! IoCreateDevice failed %!STATUS!", status);
         WdfWaitLockRelease(driverContext->ChildDeviceLock);
         return FALSE;
     }
@@ -43,7 +43,7 @@ BOOLEAN AddChildToCollection(WDFDRIVER Driver, PDEVICE_OBJECT ChildDevice) {
 
     PDEVICE_OBJECT targetDevice = IoAttachDeviceToDeviceStack(childFilterDevice, ChildDevice);
     if (targetDevice == NULL) {
-        TraceEvents(TRACE_LEVEL_ERROR, TRACE_DEVICE, "%!FUNC! IoAttachDeviceToDeviceStack returned NULL");
+        TraceEvents(TRACE_LEVEL_ERROR, TRACE_HUB_DEVICE, "%!FUNC! IoAttachDeviceToDeviceStack returned NULL");
         IoDeleteDevice(childFilterDevice);
         WdfWaitLockRelease(driverContext->ChildDeviceLock);
         return FALSE;
@@ -60,7 +60,7 @@ BOOLEAN AddChildToCollection(WDFDRIVER Driver, PDEVICE_OBJECT ChildDevice) {
     WDFOBJECT childObject;
     status = WdfObjectCreate(&attributes, &childObject);
     if (!NT_SUCCESS(status)) {
-        TraceEvents(TRACE_LEVEL_ERROR, TRACE_DEVICE, "%!FUNC! WdfObjectCreate failed %!STATUS!", status);
+        TraceEvents(TRACE_LEVEL_ERROR, TRACE_HUB_DEVICE, "%!FUNC! WdfObjectCreate failed %!STATUS!", status);
         IoDetachDevice(targetDevice);
         IoDeleteDevice(childFilterDevice);
         WdfWaitLockRelease(driverContext->ChildDeviceLock);
@@ -72,7 +72,7 @@ BOOLEAN AddChildToCollection(WDFDRIVER Driver, PDEVICE_OBJECT ChildDevice) {
 
     status = WdfCollectionAdd(driverContext->ChildDeviceCollection, childObject);
     if (!NT_SUCCESS(status)) {
-        TraceEvents(TRACE_LEVEL_ERROR, TRACE_DEVICE, "%!FUNC! WdfCollectionAdd failed %!STATUS!", status);
+        TraceEvents(TRACE_LEVEL_ERROR, TRACE_HUB_DEVICE, "%!FUNC! WdfCollectionAdd failed %!STATUS!", status);
         WdfObjectDelete(childObject);
         IoDetachDevice(targetDevice);
         IoDeleteDevice(childFilterDevice);
@@ -90,12 +90,12 @@ static NTSTATUS SendSynchronousQueryId(WDFDEVICE Device, PDEVICE_OBJECT pdo);
 static NTSTATUS SendSynchronousQueryId(WDFDEVICE Device, PDEVICE_OBJECT pdo) {
     PAGED_CODE();
 
-    TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_DEVICE, "%!FUNC! Entry");
+    TraceEvents(TRACE_LEVEL_VERBOSE, TRACE_HUB_DEVICE, "%!FUNC! Entry");
 
     WDFIOTARGET ioTarget;
     NTSTATUS status = WdfIoTargetCreate(Device, WDF_NO_OBJECT_ATTRIBUTES, &ioTarget);
     if (!NT_SUCCESS(status)) {
-        TraceEvents(TRACE_LEVEL_ERROR, TRACE_DEVICE, "%!FUNC! WdfIoTargetCreate %!STATUS!", status);
+        TraceEvents(TRACE_LEVEL_ERROR, TRACE_HUB_DEVICE, "%!FUNC! WdfIoTargetCreate %!STATUS!", status);
         return status;
     }
 
@@ -103,7 +103,7 @@ static NTSTATUS SendSynchronousQueryId(WDFDEVICE Device, PDEVICE_OBJECT pdo) {
     WDF_IO_TARGET_OPEN_PARAMS_INIT_EXISTING_DEVICE(&openParameters, pdo);
     status = WdfIoTargetOpen(ioTarget, &openParameters);
     if (!NT_SUCCESS(status)) {
-        TraceEvents(TRACE_LEVEL_ERROR, TRACE_DEVICE, "%!FUNC! WdfIoTargetOpen %!STATUS!", status);
+        TraceEvents(TRACE_LEVEL_ERROR, TRACE_HUB_DEVICE, "%!FUNC! WdfIoTargetOpen %!STATUS!", status);
         WdfObjectDelete(ioTarget);
         return status;
     }
@@ -111,7 +111,7 @@ static NTSTATUS SendSynchronousQueryId(WDFDEVICE Device, PDEVICE_OBJECT pdo) {
     WDFREQUEST request;
     status = WdfRequestCreate(WDF_NO_OBJECT_ATTRIBUTES, ioTarget, &request);
     if (!NT_SUCCESS(status)) {
-        TraceEvents(TRACE_LEVEL_ERROR, TRACE_DEVICE, "%!FUNC! WdfRequestCreate %!STATUS!", status);
+        TraceEvents(TRACE_LEVEL_ERROR, TRACE_HUB_DEVICE, "%!FUNC! WdfRequestCreate %!STATUS!", status);
         WdfObjectDelete(ioTarget);
         return status;
     }
@@ -120,7 +120,7 @@ static NTSTATUS SendSynchronousQueryId(WDFDEVICE Device, PDEVICE_OBJECT pdo) {
     WDF_REQUEST_REUSE_PARAMS_INIT(&reuseParameters, WDF_REQUEST_REUSE_NO_FLAGS, STATUS_NOT_SUPPORTED);
     status = WdfRequestReuse(request, &reuseParameters);
     if (!NT_SUCCESS(status)) {
-        TraceEvents(TRACE_LEVEL_ERROR, TRACE_DEVICE, "%!FUNC! WdfRequestReuse %!STATUS!", status);
+        TraceEvents(TRACE_LEVEL_ERROR, TRACE_HUB_DEVICE, "%!FUNC! WdfRequestReuse %!STATUS!", status);
         WdfObjectDelete(request);
         WdfObjectDelete(ioTarget);
         return status;
@@ -138,7 +138,7 @@ static NTSTATUS SendSynchronousQueryId(WDFDEVICE Device, PDEVICE_OBJECT pdo) {
     (void)WdfRequestSend(request, ioTarget, &sendOptions);
     status = WdfRequestGetStatus(request);
     if (!NT_SUCCESS(status)) {
-        TraceEvents(TRACE_LEVEL_ERROR, TRACE_DEVICE, "%!FUNC! WdfRequestGetStatus %!STATUS!", status);
+        TraceEvents(TRACE_LEVEL_ERROR, TRACE_HUB_DEVICE, "%!FUNC! WdfRequestGetStatus %!STATUS!", status);
         WdfObjectDelete(request);
         WdfObjectDelete(ioTarget);
         return status;
@@ -146,13 +146,13 @@ static NTSTATUS SendSynchronousQueryId(WDFDEVICE Device, PDEVICE_OBJECT pdo) {
 
     PWCHAR deviceId = (PWCHAR)WdfRequestGetInformation(request);
     if (deviceId == NULL) {
-        TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_DEVICE, "%!FUNC! DeviceId is NULL");
+        TraceEvents(TRACE_LEVEL_ERROR, TRACE_HUB_DEVICE, "%!FUNC! DeviceId is NULL");
         WdfObjectDelete(request);
         WdfObjectDelete(ioTarget);
         return STATUS_INVALID_DEVICE_REQUEST;
     }
 
-    TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_DEVICE, "%!FUNC! DeviceId: %ws", deviceId);
+    TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_HUB_DEVICE, "%!FUNC! DeviceId: %ws", deviceId);
 
     ExFreePool(deviceId);
     WdfObjectDelete(request);
@@ -174,14 +174,14 @@ static EVT_WDF_WORKITEM EvtWorkItemCallback;
 _Use_decl_annotations_
 static VOID EvtWorkItemCallback(WDFWORKITEM WorkItem) {
     PAGED_CODE();
-    TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_DEVICE, "%!FUNC! Entry");
+    TraceEvents(TRACE_LEVEL_VERBOSE, TRACE_HUB_DEVICE, "%!FUNC! Entry");
 
     // We already know this is a successful completion, so we can safely inspect the results.
 
     PWORKITEM_CONTEXT context = WdfWorkItemGetContext(WorkItem);
     PDEVICE_RELATIONS relations = (PDEVICE_RELATIONS)context->Irp->IoStatus.Information;
 
-    TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_DEVICE, "%!FUNC! relations count = %lu", relations->Count);
+    TraceEvents(TRACE_LEVEL_VERBOSE, TRACE_HUB_DEVICE, "%!FUNC! relations count = %lu", relations->Count);
 
     WDFDEVICE device = (WDFDEVICE)WdfWorkItemGetParentObject(WorkItem);
     WDFDRIVER driver = WdfDeviceGetDriver(device);
@@ -189,7 +189,7 @@ static VOID EvtWorkItemCallback(WDFWORKITEM WorkItem) {
     for (ULONG i = 0; i < relations->Count; i++) {
         PDEVICE_OBJECT pdo = relations->Objects[i];
         if (pdo != NULL) {
-            TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_DEVICE, "%!FUNC! found child PDO at index %u: %p", i, pdo);
+            TraceEvents(TRACE_LEVEL_VERBOSE, TRACE_HUB_DEVICE, "%!FUNC! found child PDO at index %u: %p", i, pdo);
             (void)SendSynchronousQueryId(device, pdo);
             (void)AddChildToCollection(driver, pdo);
         }
@@ -206,21 +206,21 @@ _Use_decl_annotations_
 static NTSTATUS HubBusRelationsCompletion(PDEVICE_OBJECT DeviceObject, PIRP Irp, PVOID Context) {
     UNREFERENCED_PARAMETER(DeviceObject);
 
-    TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_DEVICE, "%!FUNC! Entry");
+    TraceEvents(TRACE_LEVEL_VERBOSE, TRACE_HUB_DEVICE, "%!FUNC! Entry");
 
     WDFDEVICE device = (WDFDEVICE)Context;
 
     if (!NT_SUCCESS(Irp->IoStatus.Status) && (Irp->IoStatus.Information == 0)) {
-        TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_DEVICE, "%!FUNC! lower driver failed");
+        TraceEvents(TRACE_LEVEL_WARNING, TRACE_HUB_DEVICE, "%!FUNC! lower driver failed");
         // Not interested in failed results.
         if (Irp->PendingReturned) {
-            TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_DEVICE, "%!FUNC! pending");
+            TraceEvents(TRACE_LEVEL_VERBOSE, TRACE_HUB_DEVICE, "%!FUNC! pending");
             IoMarkIrpPending(Irp);
         }
         return STATUS_CONTINUE_COMPLETION;
     }
 
-    TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_DEVICE, "%!FUNC! scheduling worker");
+    TraceEvents(TRACE_LEVEL_VERBOSE, TRACE_HUB_DEVICE, "%!FUNC! scheduling worker");
 
     WDF_WORKITEM_CONFIG workItemConfig;
     WDF_WORKITEM_CONFIG_INIT(&workItemConfig, EvtWorkItemCallback);
@@ -232,9 +232,9 @@ static NTSTATUS HubBusRelationsCompletion(PDEVICE_OBJECT DeviceObject, PIRP Irp,
     WDFWORKITEM workItem;
     NTSTATUS status = WdfWorkItemCreate(&workItemConfig, &attributes, &workItem);
     if (!NT_SUCCESS(status)) {
-        TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_DEVICE, "%!FUNC! WdfWorkItemCreate %!STATUS!", status);
+        TraceEvents(TRACE_LEVEL_ERROR, TRACE_HUB_DEVICE, "%!FUNC! WdfWorkItemCreate %!STATUS!", status);
         if (Irp->PendingReturned) {
-            TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_DEVICE, "%!FUNC! pending");
+            TraceEvents(TRACE_LEVEL_VERBOSE, TRACE_HUB_DEVICE, "%!FUNC! pending");
             IoMarkIrpPending(Irp);
         }
         return STATUS_CONTINUE_COMPLETION;
@@ -255,12 +255,12 @@ _Use_decl_annotations_
 static NTSTATUS HubQueryDeviceRelations(WDFDEVICE Device, PIRP Irp) {
     PAGED_CODE();
 
-    TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_DEVICE, "%!FUNC!");
+    TraceEvents(TRACE_LEVEL_VERBOSE, TRACE_HUB_DEVICE, "%!FUNC!");
 
     PIO_STACK_LOCATION irpStack = IoGetCurrentIrpStackLocation(Irp);
 
     if (irpStack->Parameters.QueryDeviceRelations.Type != BusRelations) {
-        TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_DEVICE, "%!FUNC! OtherRelations");
+        TraceEvents(TRACE_LEVEL_VERBOSE, TRACE_HUB_DEVICE, "%!FUNC! OtherRelations");
         // We are only interested in BusRelations. Just pass anything else down without interception.
         IoSkipCurrentIrpStackLocation(Irp);
         return WdfDeviceWdmDispatchPreprocessedIrp(Device, Irp);
@@ -268,7 +268,7 @@ static NTSTATUS HubQueryDeviceRelations(WDFDEVICE Device, PIRP Irp) {
 
     // We need to bypass WDF, because we need a worker in our completion routine.
 
-    TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_DEVICE, "%!FUNC! BusRelations");
+    TraceEvents(TRACE_LEVEL_VERBOSE, TRACE_HUB_DEVICE, "%!FUNC! BusRelations");
 
     IoMarkIrpPending(Irp);
     IoCopyCurrentIrpStackLocationToNext(Irp);
@@ -284,21 +284,21 @@ _Use_decl_annotations_
 static void HubDeviceContextCleanup(WDFOBJECT Device) {
     PAGED_CODE();
 
-    TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_DEVICE, "%!FUNC! Entry");
+    TraceEvents(TRACE_LEVEL_VERBOSE, TRACE_HUB_DEVICE, "%!FUNC! Entry");
 
     WDFDRIVER driver = WdfDeviceGetDriver((WDFDEVICE)Device);
     PDRIVER_CONTEXT driverContext = DriverGetContext(driver);
     (void)WdfWaitLockAcquire(driverContext->HubDeviceLock, NULL);
     driverContext->HubDeviceCount--;
-    TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_DEVICE, "%!FUNC! HubDeviceCount is now %d.", driverContext->HubDeviceCount);
+    TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_HUB_DEVICE, "%!FUNC! HubDeviceCount is now %d.", driverContext->HubDeviceCount);
     if ((driverContext->HubDeviceCount == 0) && (driverContext->ControlDevice != NULL)) {
-        TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_DEVICE, "%!FUNC! Deleting control device.");
+        TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_HUB_DEVICE, "%!FUNC! Deleting control device.");
         WdfObjectDelete(driverContext->ControlDevice);
         driverContext->ControlDevice = NULL;
     }
     WdfWaitLockRelease(driverContext->HubDeviceLock);
 
-    TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_DEVICE, "%!FUNC! Exit");
+    TraceEvents(TRACE_LEVEL_VERBOSE, TRACE_HUB_DEVICE, "%!FUNC! Exit");
 }
 
 
@@ -307,7 +307,7 @@ _Use_decl_annotations_
 NTSTATUS HubCreateDevice(WDFDRIVER Driver, PWDFDEVICE_INIT DeviceInit) {
     PAGED_CODE();
 
-    TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_DEVICE, "%!FUNC! Entry");
+    TraceEvents(TRACE_LEVEL_VERBOSE, TRACE_HUB_DEVICE, "%!FUNC! Entry");
 
     //
     // Tell the framework that we are a filter driver.
@@ -324,14 +324,14 @@ NTSTATUS HubCreateDevice(WDFDRIVER Driver, PWDFDEVICE_INIT DeviceInit) {
     UCHAR minorCode = IRP_MN_QUERY_DEVICE_RELATIONS;
     NTSTATUS status = WdfDeviceInitAssignWdmIrpPreprocessCallback(DeviceInit, HubQueryDeviceRelations, IRP_MJ_PNP, &minorCode, 1);
     if (!NT_SUCCESS(status)) {
-        TraceEvents(TRACE_LEVEL_ERROR, TRACE_DEVICE, "%!FUNC! WdfDeviceInitAssignWdmIrpPreprocessCallback failed %!STATUS!", status);
+        TraceEvents(TRACE_LEVEL_ERROR, TRACE_HUB_DEVICE, "%!FUNC! WdfDeviceInitAssignWdmIrpPreprocessCallback failed %!STATUS!", status);
         return status;
     }
 
     WDFDEVICE device;
     status = WdfDeviceCreate(&DeviceInit, &deviceAttributes, &device);
     if (!NT_SUCCESS(status)) {
-        TraceEvents(TRACE_LEVEL_ERROR, TRACE_DEVICE, "%!FUNC! WdfDeviceCreate failed %!STATUS!", status);
+        TraceEvents(TRACE_LEVEL_ERROR, TRACE_HUB_DEVICE, "%!FUNC! WdfDeviceCreate failed %!STATUS!", status);
         return status;
     }
 
@@ -348,10 +348,10 @@ NTSTATUS HubCreateDevice(WDFDRIVER Driver, PWDFDEVICE_INIT DeviceInit) {
     PDRIVER_CONTEXT driverContext = DriverGetContext(Driver);
     (void)WdfWaitLockAcquire(driverContext->HubDeviceLock, NULL);
     driverContext->HubDeviceCount++;
-    TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_DEVICE, "%!FUNC! HubDeviceCount is now %d.", driverContext->HubDeviceCount);
+    TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_HUB_DEVICE, "%!FUNC! HubDeviceCount is now %d.", driverContext->HubDeviceCount);
     if (driverContext->ControlDevice == NULL) {
         status = ControlCreateDevice(Driver);
-        TraceEvents(TRACE_LEVEL_ERROR, TRACE_DEVICE, "%!FUNC! ControlCreateDevice status %!STATUS!", status);
+        TraceEvents(TRACE_LEVEL_ERROR, TRACE_HUB_DEVICE, "%!FUNC! ControlCreateDevice status %!STATUS!", status);
         // Too bad if this fails, but we will continue. The control device will not be available, but the filter device will still load correctly.
     }
     WdfWaitLockRelease(driverContext->HubDeviceLock);
@@ -360,7 +360,7 @@ NTSTATUS HubCreateDevice(WDFDRIVER Driver, PWDFDEVICE_INIT DeviceInit) {
     // NOTE: We don't need a queue, we only need to intercept IRP_MN_QUERY_DEVICE_RELATIONS, which we already did above.
     //
 
-    TraceEvents(TRACE_LEVEL_ERROR, TRACE_DEVICE, "%!FUNC! Success");
+    TraceEvents(TRACE_LEVEL_VERBOSE, TRACE_HUB_DEVICE, "%!FUNC! Success");
 
     return STATUS_SUCCESS;
 }
