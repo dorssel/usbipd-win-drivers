@@ -17,7 +17,7 @@ _Use_decl_annotations_
 static NTSTATUS ChildDispatchStubPnp(PDEVICE_OBJECT DeviceObject, PIRP Irp) {
     PAGED_CODE();
 
-    TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_DRIVER, "%!FUNC! Entry");
+    TraceEvents(TRACE_LEVEL_VERBOSE, TRACE_CHILD_DEVICE, "%!FUNC! Entry");
 
     PCHILD_DEVICE_CONTEXT deviceContext = (PCHILD_DEVICE_CONTEXT)DeviceObject->DeviceExtension;
     PIO_STACK_LOCATION stackLocation = IoGetCurrentIrpStackLocation(Irp);
@@ -27,11 +27,11 @@ static NTSTATUS ChildDispatchStubPnp(PDEVICE_OBJECT DeviceObject, PIRP Irp) {
 
     switch (stackLocation->MinorFunction) {
     case IRP_MN_QUERY_ID:
-        TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_DRIVER, "%!FUNC! IRP_MN_QUERY_ID %d", stackLocation->Parameters.QueryId.IdType);
+        TraceEvents(TRACE_LEVEL_VERBOSE, TRACE_CHILD_DEVICE, "%!FUNC! IRP_MN_QUERY_ID %d", stackLocation->Parameters.QueryId.IdType);
 
         switch (stackLocation->Parameters.QueryId.IdType) {
         case BusQueryDeviceID: {
-            TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_DRIVER, "%!FUNC! BusQueryDeviceID");
+            TraceEvents(TRACE_LEVEL_VERBOSE, TRACE_CHILD_DEVICE, "%!FUNC! BusQueryDeviceID");
 
             USHORT bufferLength = deviceIdStr.Length + sizeof(WCHAR);
             PWSTR deviceIdBuffer = (PWSTR)ExAllocatePoolWithTag(PagedPool, bufferLength, POOL_TAG);
@@ -49,7 +49,7 @@ static NTSTATUS ChildDispatchStubPnp(PDEVICE_OBJECT DeviceObject, PIRP Irp) {
         }
 
         case BusQueryHardwareIDs: {
-            TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_DRIVER, "%!FUNC! BusQueryHardwareIDs");
+            TraceEvents(TRACE_LEVEL_VERBOSE, TRACE_CHILD_DEVICE, "%!FUNC! BusQueryHardwareIDs");
 
             USHORT bufferLength = deviceIdStr.Length + 2 * sizeof(WCHAR);
             PWSTR hardwareIdsBuffer = (PWSTR)ExAllocatePoolWithTag(PagedPool, bufferLength, POOL_TAG);
@@ -67,7 +67,7 @@ static NTSTATUS ChildDispatchStubPnp(PDEVICE_OBJECT DeviceObject, PIRP Irp) {
         }
 
         case BusQueryCompatibleIDs: {
-            TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_DRIVER, "%!FUNC! BusQueryCompatibleIDs");
+            TraceEvents(TRACE_LEVEL_VERBOSE, TRACE_CHILD_DEVICE, "%!FUNC! BusQueryCompatibleIDs");
 
             // return default STATUS_NOT_SUPPORTED (which is already set for every IRP_MJ_PNP)
             IoCompleteRequest(Irp, IO_NO_INCREMENT);
@@ -80,11 +80,11 @@ static NTSTATUS ChildDispatchStubPnp(PDEVICE_OBJECT DeviceObject, PIRP Irp) {
         break;
 
     case IRP_MN_QUERY_DEVICE_TEXT:
-        TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_DRIVER, "%!FUNC! IRP_MN_QUERY_DEVICE_TEXT %d", stackLocation->Parameters.QueryDeviceText.DeviceTextType);
+        TraceEvents(TRACE_LEVEL_VERBOSE, TRACE_CHILD_DEVICE, "%!FUNC! IRP_MN_QUERY_DEVICE_TEXT %d", stackLocation->Parameters.QueryDeviceText.DeviceTextType);
 
         switch (stackLocation->Parameters.QueryDeviceText.DeviceTextType) {
         case DeviceTextDescription: {
-            TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_DRIVER, "%!FUNC! DeviceTextDescription");
+            TraceEvents(TRACE_LEVEL_VERBOSE, TRACE_CHILD_DEVICE, "%!FUNC! DeviceTextDescription");
             USHORT bufferLength = deviceTextStr.Length + sizeof(WCHAR);
             PWSTR deviceTextBuffer = (PWSTR)ExAllocatePoolWithTag(PagedPool, bufferLength, POOL_TAG);
             if (deviceTextBuffer == NULL) {
@@ -120,13 +120,13 @@ _Use_decl_annotations_
 static NTSTATUS ChildDispatchPnP(PDEVICE_OBJECT DeviceObject, PIRP Irp) {
     PAGED_CODE();
 
-    TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_DRIVER, "%!FUNC! Entry");
+    TraceEvents(TRACE_LEVEL_VERBOSE, TRACE_CHILD_DEVICE, "%!FUNC! Entry");
 
     PCHILD_DEVICE_CONTEXT deviceContext = (PCHILD_DEVICE_CONTEXT)DeviceObject->DeviceExtension;
     PIO_STACK_LOCATION stackLocation = IoGetCurrentIrpStackLocation(Irp);
 
     if (stackLocation->MinorFunction == IRP_MN_REMOVE_DEVICE) {
-        TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_DRIVER, "%!FUNC! IRP_MN_REMOVE_DEVICE");
+        TraceEvents(TRACE_LEVEL_VERBOSE, TRACE_CHILD_DEVICE, "%!FUNC! IRP_MN_REMOVE_DEVICE");
 
         WDFDRIVER driver = WdfGetDriver();
         if (driver != NULL) {
@@ -137,7 +137,7 @@ static NTSTATUS ChildDispatchPnP(PDEVICE_OBJECT DeviceObject, PIRP Irp) {
                 WDFOBJECT childObject = WdfCollectionGetItem(driverContext->ChildDeviceCollection, i);
                 PCHILD_OBJECT_CONTEXT childObjectContext = WdfObjectGetContext(childObject);
                 if (childObjectContext->ChildDevice == DeviceObject) {
-                    TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_DRIVER, "%!FUNC! Removing child device %p from collection", DeviceObject);
+                    TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_CHILD_DEVICE, "%!FUNC! Removing child device %p from collection", DeviceObject);
                     WdfCollectionRemove(driverContext->ChildDeviceCollection, childObject);
                     break;
                 }
@@ -163,13 +163,13 @@ static NTSTATUS ChildDispatchPnP(PDEVICE_OBJECT DeviceObject, PIRP Irp) {
 
 _Use_decl_annotations_
 NTSTATUS ChildDispatch(PDEVICE_OBJECT DeviceObject, PIRP Irp) {
-    TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_DRIVER, "%!FUNC! Entry");
+    TraceEvents(TRACE_LEVEL_VERBOSE, TRACE_CHILD_DEVICE, "%!FUNC! Entry");
 
     PCHILD_DEVICE_CONTEXT deviceContext = (PCHILD_DEVICE_CONTEXT)DeviceObject->DeviceExtension;
     PIO_STACK_LOCATION stackLocation = IoGetCurrentIrpStackLocation(Irp);
 
     if (stackLocation->MajorFunction == IRP_MJ_PNP) {
-        TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_DRIVER, "%!FUNC! IRP_MJ_PNP MinorFunction: 0x%02x", stackLocation->MinorFunction);
+        TraceEvents(TRACE_LEVEL_VERBOSE, TRACE_CHILD_DEVICE, "%!FUNC! IRP_MJ_PNP MinorFunction: 0x%02x", stackLocation->MinorFunction);
         return ChildDispatchPnP(DeviceObject, Irp);
     }
 

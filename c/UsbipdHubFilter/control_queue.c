@@ -21,7 +21,7 @@ static void ControlEvtIoDeviceControl(WDFQUEUE Queue, WDFREQUEST Request, size_t
     UNREFERENCED_PARAMETER(OutputBufferLength);
     UNREFERENCED_PARAMETER(InputBufferLength);
 
-    TraceEvents(TRACE_LEVEL_INFORMATION,
+    TraceEvents(TRACE_LEVEL_VERBOSE,
         TRACE_CONTROL_QUEUE,
         "%!FUNC! Queue 0x%p, Request 0x%p OutputBufferLength %d InputBufferLength %d IoControlCode %d",
         Queue, Request, (int)OutputBufferLength, (int)InputBufferLength, IoControlCode);
@@ -47,7 +47,7 @@ static void ControlEvtIoDeviceControl(WDFQUEUE Queue, WDFREQUEST Request, size_t
     }
 
     default:
-        TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_CONTROL_QUEUE, "Invalid IOCTL request %ulx", IoControlCode);
+        TraceEvents(TRACE_LEVEL_WARNING, TRACE_CONTROL_QUEUE, "Invalid IOCTL request %ulx", IoControlCode);
         status = STATUS_INVALID_DEVICE_REQUEST;
         break;
     }
