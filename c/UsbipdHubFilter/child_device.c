@@ -34,8 +34,9 @@ static NTSTATUS ChildDispatchStubPnp(PDEVICE_OBJECT DeviceObject, PIRP Irp) {
             TraceEvents(TRACE_LEVEL_VERBOSE, TRACE_CHILD_DEVICE, "%!FUNC! BusQueryDeviceID");
 
             USHORT bufferLength = deviceIdStr.Length + sizeof(WCHAR);
-            PWSTR deviceIdBuffer = (PWSTR)ExAllocatePoolWithTag(PagedPool, bufferLength, POOL_TAG);
+            PWSTR deviceIdBuffer = (PWSTR)ExAllocatePoolZero(PagedPool, bufferLength, POOL_TAG);
             if (deviceIdBuffer == NULL) {
+                TraceEvents(TRACE_LEVEL_ERROR, TRACE_CHILD_DEVICE, "%!FUNC! ExAllocatePoolZero failed");
                 Irp->IoStatus.Status = STATUS_INSUFFICIENT_RESOURCES;
                 IoCompleteRequest(Irp, IO_NO_INCREMENT);
                 return STATUS_INSUFFICIENT_RESOURCES;
@@ -52,8 +53,9 @@ static NTSTATUS ChildDispatchStubPnp(PDEVICE_OBJECT DeviceObject, PIRP Irp) {
             TraceEvents(TRACE_LEVEL_VERBOSE, TRACE_CHILD_DEVICE, "%!FUNC! BusQueryHardwareIDs");
 
             USHORT bufferLength = deviceIdStr.Length + 2 * sizeof(WCHAR);
-            PWSTR hardwareIdsBuffer = (PWSTR)ExAllocatePoolWithTag(PagedPool, bufferLength, POOL_TAG);
+            PWSTR hardwareIdsBuffer = (PWSTR)ExAllocatePoolZero(PagedPool, bufferLength, POOL_TAG);
             if (hardwareIdsBuffer == NULL) {
+                TraceEvents(TRACE_LEVEL_ERROR, TRACE_CHILD_DEVICE, "%!FUNC! ExAllocatePoolZero failed");
                 Irp->IoStatus.Status = STATUS_INSUFFICIENT_RESOURCES;
                 IoCompleteRequest(Irp, IO_NO_INCREMENT);
                 return STATUS_INSUFFICIENT_RESOURCES;
@@ -86,8 +88,9 @@ static NTSTATUS ChildDispatchStubPnp(PDEVICE_OBJECT DeviceObject, PIRP Irp) {
         case DeviceTextDescription: {
             TraceEvents(TRACE_LEVEL_VERBOSE, TRACE_CHILD_DEVICE, "%!FUNC! DeviceTextDescription");
             USHORT bufferLength = deviceTextStr.Length + sizeof(WCHAR);
-            PWSTR deviceTextBuffer = (PWSTR)ExAllocatePoolWithTag(PagedPool, bufferLength, POOL_TAG);
+            PWSTR deviceTextBuffer = (PWSTR)ExAllocatePoolZero(PagedPool, bufferLength, POOL_TAG);
             if (deviceTextBuffer == NULL) {
+                TraceEvents(TRACE_LEVEL_ERROR, TRACE_CHILD_DEVICE, "%!FUNC! ExAllocatePoolZero failed");
                 Irp->IoStatus.Status = STATUS_INSUFFICIENT_RESOURCES;
                 IoCompleteRequest(Irp, IO_NO_INCREMENT);
                 return STATUS_INSUFFICIENT_RESOURCES;
@@ -136,18 +139,20 @@ static NTSTATUS ForcePortCycle(PDEVICE_OBJECT LowerDeviceObject) {
     if (status == STATUS_PENDING) {
         LARGE_INTEGER timeout = { .QuadPart  = -(LONGLONG)5 * 1000 * 1000 * 10 };  // 5s relative timeout
         status = KeWaitForSingleObject(&event, Executive, KernelMode, FALSE, &timeout);
-        if (status == STATUS_TIMEOUT) {
-            TraceEvents(TRACE_LEVEL_WARNING, TRACE_CHILD_DEVICE, "%!FUNC! KeWaitForSingleObject timed out");
-            return STATUS_IO_TIMEOUT;
-        }
-        if (!NT_SUCCESS(status)) {
-            TraceEvents(TRACE_LEVEL_ERROR, TRACE_CHILD_DEVICE, "%!FUNC! KeWaitForSingleObject failed: 0x%08x", status);
-            return status;
+        if (!NT_SUCCESS(status)) {  // Including STATUS_TIMEOUT, which is the only non-success that could realistically happen.
+            TraceEvents(TRACE_LEVEL_ERROR, TRACE_CHILD_DEVICE, "%!FUNC! KeWaitForSingleObject failed: %!STATUS!", status);
+            // Since the port cycle is a best-effort attempt, we simply try to cancel the IRP if a timeout occurs.
+            IoCancelIrp(irp);
+            // IoBuildDeviceIoControlRequest is fully synchronous, so we must wait indefinitely.
+            (void)KeWaitForSingleObject(&event, Executive, KernelMode, FALSE, NULL);
         }
         status = ioStatus.Status;
-    }
-    if (!NT_SUCCESS(status)) {
-        TraceEvents(TRACE_LEVEL_ERROR, TRACE_CHILD_DEVICE, "%!FUNC! IoCallDriver failed: 0x%08x", status);
+        if (!NT_SUCCESS(status)) {
+            TraceEvents(TRACE_LEVEL_ERROR, TRACE_CHILD_DEVICE, "%!FUNC! IOCTL_INTERNAL_USB_CYCLE_PORT failed: %!STATUS!", status);
+            return status;
+        }
+    } else if (!NT_SUCCESS(status)) {
+        TraceEvents(TRACE_LEVEL_ERROR, TRACE_CHILD_DEVICE, "%!FUNC! IoCallDriver failed: %!STATUS!", status);
         return status;
     }
 

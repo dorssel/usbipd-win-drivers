@@ -75,7 +75,7 @@ _Use_decl_annotations_
 NTSTATUS StubQueueInitialize(WDFDEVICE Device) {
     PAGED_CODE();
 
-    TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_QUEUE, "%!FUNC! Entry");
+    TraceEvents(TRACE_LEVEL_VERBOSE, TRACE_QUEUE, "%!FUNC! Entry");
 
     WDF_IO_QUEUE_CONFIG queueConfig;
     WDF_IO_QUEUE_CONFIG_INIT_DEFAULT_QUEUE(&queueConfig, WdfIoQueueDispatchSequential);
