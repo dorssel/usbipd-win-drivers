@@ -10,9 +10,9 @@
       },
       "System.CodeDom": {
         "type": "Direct",
-        "requested": "[10.0.9, )",
-        "resolved": "10.0.9",
-        "contentHash": "scH7O8oAuOMyZKOEiOQB3ZVz6x9XkrZNKNeWVCxdvkJHSy4SYXyinGK0o2Rn5LiGh+ovezziT2WCdqWKa7WMKA=="
+        "requested": "[10.0.10, )",
+        "resolved": "10.0.10",
+        "contentHash": "lru5igKxs4OgWKfMeOpMAYpfB1tNSSXHk2zyiSDO/h0u8RVAhN6KqW9d3ANybDB+ePIHg6HM/NlE8HlpOk4k5A=="
       }
     }
   }
