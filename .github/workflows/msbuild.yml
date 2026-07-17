@@ -18,13 +18,16 @@ permissions: {}
 jobs:
   build:
     name: Build
-    runs-on: windows-2025-vs2026
+    runs-on: windows-latest
 
     permissions:
       contents: write
       pull-requests: write
       id-token: write
       attestations: write
+
+    env:
+      NUGET_PACKAGES: ${{ github.workspace }}/.nuget/packages
 
     steps:
       - name: Checkout
@@ -41,6 +44,7 @@ jobs:
       - name: Setup .NET
         uses: actions/setup-dotnet@a98b56852c35b8e3190ac28c8c2271da59106c68 # v6.0.0
         with:
+          architecture: x64
           cache: true
           cache-dependency-path: |
             global.json
@@ -52,11 +56,21 @@ jobs:
 
       - name: Build x64 Drivers
         run: |
-          msbuild -maxCpuCount -property:Configuration=Release -property:Platform=x64 -binaryLogger:LogFile=build-x64.binlog
+          msbuild `
+            -maxCpuCount `
+            -property:RestorePackages=false `
+            -property:Configuration=Release `
+            -property:Platform=x64 `
+            -binaryLogger:LogFile=build-x64.binlog
 
       - name: Build arm64 Drivers
         run: |
-          msbuild -maxCpuCount -property:Configuration=Release -property:Platform=ARM64 -binaryLogger:LogFile=build-arm64.binlog
+          msbuild `
+            -maxCpuCount `
+            -property:RestorePackages=false `
+            -property:Configuration=Release `
+            -property:Platform=ARM64 `
+            -binaryLogger:LogFile=build-arm64.binlog
 
       - name: Upload Artifacts
         id: upload
