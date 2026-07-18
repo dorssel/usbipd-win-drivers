@@ -66,23 +66,41 @@ jobs:
         run: |
           makecab /D arch=arm64 /f .\c\windows-attestation.ddf
 
-      - name: Upload x64 Artifacts
+      - name: Upload windows-attestation-x64
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           path: x64/Release/windows-attestation-x64.cab
           archive: false
 
-      - name: Upload arm64 Artifacts
+      - name: Upload windows-attestation-arm64
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           path: ARM64/Release/windows-attestation-arm64.cab
           archive: false
 
-      - name: Build Attestation
+      - name: Upload Full Debug Symbols
+        id: upload-debug
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: full-debug-symbols
+          path: |
+            x64/Release/UsbipdHubFilter.pdb
+            x64/Release/UsbipdStub.pdb
+            ARM64/Release/UsbipdHubFilter.pdb
+            ARM64/Release/UsbipdStub.pdb
+
+      - name: GitHub Attestation for windows-attestation-*.cab
         if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository
         uses: actions/attest@f7c74d28b9d84cb8768d0b8ca14a4bac6ef463e6 # v4.2.0
         with:
           subject-path: '*/Release/windows-attestation-*.cab'
+
+      - name: GitHub Attestation for Debug Symbols
+        if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository
+        uses: actions/attest@f7c74d28b9d84cb8768d0b8ca14a4bac6ef463e6 # v4.2.0
+        with:
+          subject-name: full-debug-symbols.zip
+          subject-digest: sha256:${{ steps.upload-debug.outputs.artifact-digest }}
 
       - name: Submit Dependencies to GitHub
         if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository
