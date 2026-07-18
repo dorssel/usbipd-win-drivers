@@ -1,0 +1,28 @@
+; SPDX-FileCopyrightText: 2026 Frans van Dorsselaer
+;
+; SPDX-License-Identifier: GPL-3.0-only
+
+.Set CabinetFileCountThreshold=0
+.Set FolderFileCountThreshold=0
+.Set FolderSizeThreshold=0
+.Set MaxCabinetSize=0
+.Set MaxDiskFileCount=0
+.Set MaxDiskSize=0
+.Set CompressionType=MSZIP
+.Set Cabinet=on
+.Set Compress=on
+.Set InfFileName=nul
+.Set RptFileName=nul
+
+.Set CabinetNameTemplate=windows-attestation-%arch%.cab
+.Set DiskDirectory1=%arch%\Release
+
+.Set DestinationDir=UsbipdHubFilter
+%arch%\Release\UsbipdHubFilter.inf
+%arch%\Release\UsbipdHubFilter.sys
+%arch%\Release\UsbipdHubFilter-stripped.pdb UsbipdHubFilter.pdb
+
+.Set DestinationDir=UsbipdStub
+%arch%\Release\UsbipdStub.inf
+%arch%\Release\UsbipdStub.sys
+%arch%\Release\UsbipdStub-stripped.pdb UsbipdStub.pdb

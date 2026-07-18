@@ -26,6 +26,7 @@
 *.c         text
 *.h         text
 *.inf       text eol=crlf
+*.ddf       text
 
 *.csproj    text
 *.cs        text eol=crlf

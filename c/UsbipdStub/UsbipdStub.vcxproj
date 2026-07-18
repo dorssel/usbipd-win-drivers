@@ -184,6 +184,8 @@ SPDX-License-Identifier: GPL-3.0-only
     <Link>
       <AdditionalDependencies>%(AdditionalDependencies);usbdex.lib;ntstrsafe.lib</AdditionalDependencies>
       <AdditionalOptions>/PDBALTPATH:%_PDB% %(AdditionalOptions)</AdditionalOptions>
+      <StripPrivateSymbols>$(OutDir)$(TargetName)-stripped.pdb</StripPrivateSymbols>
+      <GenerateDebugInformation>DebugFull</GenerateDebugInformation>
     </Link>
     <PreBuildEvent>
       <Command>"$(ProjectDir)..\..\csharp\VersionHelper\bin\$(Configuration)\net10.0\VersionHelper.exe" "$(TargetFileName)" "USB/IP Stub Driver" "$(ProjectDir)\generated\version.rc"</Command>
@@ -236,6 +238,8 @@ SPDX-License-Identifier: GPL-3.0-only
     <Link>
       <AdditionalDependencies>%(AdditionalDependencies);usbdex.lib;ntstrsafe.lib</AdditionalDependencies>
       <AdditionalOptions>/PDBALTPATH:%_PDB% %(AdditionalOptions)</AdditionalOptions>
+      <StripPrivateSymbols>$(OutDir)$(TargetName)-stripped.pdb</StripPrivateSymbols>
+      <GenerateDebugInformation>DebugFull</GenerateDebugInformation>
     </Link>
     <PreBuildEvent>
       <Command>"$(ProjectDir)..\..\csharp\VersionHelper\bin\$(Configuration)\net10.0\VersionHelper.exe" "$(TargetFileName)" "USB/IP Stub Driver" "$(ProjectDir)\generated\version.rc"</Command>
