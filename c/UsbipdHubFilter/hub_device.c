@@ -11,6 +11,7 @@
 #include "child_device.h"
 #include "control_device.h"
 #include "driver.h"
+#include "public.h"
 
 
 BOOLEAN AddChildToCollection(WDFDRIVER Driver, PDEVICE_OBJECT ChildDevice) {
@@ -85,12 +86,81 @@ BOOLEAN AddChildToCollection(WDFDRIVER Driver, PDEVICE_OBJECT ChildDevice) {
 }
 
 
-static NTSTATUS SendSynchronousQueryId(WDFDEVICE Device, PDEVICE_OBJECT pdo);
-#pragma alloc_text(PAGE, SendSynchronousQueryId)
-static NTSTATUS SendSynchronousQueryId(WDFDEVICE Device, PDEVICE_OBJECT pdo) {
+static NTSTATUS ParseDecimal(_In_ PWCHAR text, int length, _Out_ PUSHORT value);
+#pragma alloc_text(PAGE, ParseDecimal)
+_Use_decl_annotations_
+static NTSTATUS ParseDecimal(PWCHAR text, int length, PUSHORT value) {
+    PAGED_CODE();
+
+    if (value == NULL) {
+        return STATUS_INVALID_PARAMETER;
+    }
+    *value = 0;
+
+    if (text == NULL || length < 1 || length > 4) {
+        return STATUS_INVALID_PARAMETER;
+    }
+
+    for (int i = 0; i < length; i++) {
+        if (text[i] < L'0' || text[i] > L'9') {
+            *value = 0;
+            return STATUS_INVALID_PARAMETER;
+        }
+        *value = (*value * 10) + (text[i] - L'0');
+    }
+
+    return STATUS_SUCCESS;
+}
+
+
+static NTSTATUS ParseHexadecimal(_In_ PWCHAR text, int length, _Out_ PUSHORT value);
+#pragma alloc_text(PAGE, ParseHexadecimal)
+_Use_decl_annotations_
+static NTSTATUS ParseHexadecimal(PWCHAR text, int length, PUSHORT value) {
+    PAGED_CODE();
+
+    if (value == NULL) {
+        return STATUS_INVALID_PARAMETER;
+    }
+    *value = 0;
+
+    if (text == NULL || length < 1 || length > 4) {
+        return STATUS_INVALID_PARAMETER;
+    }
+
+    for (int i = 0; i < length; i++) {
+        if (text[i] >= L'0' && text[i] <= L'9') {
+            *value = (*value * 16) + (text[i] - L'0');
+        } else if (text[i] >= L'A' && text[i] <= L'F') {
+            *value = (*value * 16) + (text[i] - L'A' + 10);
+        } else if (text[i] >= L'a' && text[i] <= L'f') {
+            *value = (*value * 16) + (text[i] - L'a' + 10);
+        } else {
+            *value = 0;
+            return STATUS_INVALID_PARAMETER;
+        }
+    }
+
+    return STATUS_SUCCESS;
+}
+
+
+/// <summary>
+/// Sets vidPid to 0000:0000 on failure.
+/// </summary>
+static NTSTATUS GetVidPid(WDFDEVICE Device, PDEVICE_OBJECT pdo, PVID_PID vidPid);
+#pragma alloc_text(PAGE, GetVidPid)
+static NTSTATUS GetVidPid(WDFDEVICE Device, PDEVICE_OBJECT pdo, PVID_PID vidPid) {
     PAGED_CODE();
 
     TraceEvents(TRACE_LEVEL_VERBOSE, TRACE_HUB_DEVICE, "%!FUNC! Entry");
+
+    if (vidPid == NULL) {
+        TraceEvents(TRACE_LEVEL_ERROR, TRACE_HUB_DEVICE, "%!FUNC! vidPid is NULL");
+        return STATUS_INVALID_PARAMETER;
+    }
+    vidPid->Vid = 0;
+    vidPid->Pid = 0;
 
     WDFIOTARGET ioTarget;
     NTSTATUS status = WdfIoTargetCreate(Device, WDF_NO_OBJECT_ATTRIBUTES, &ioTarget);
@@ -154,7 +224,182 @@ static NTSTATUS SendSynchronousQueryId(WDFDEVICE Device, PDEVICE_OBJECT pdo) {
 
     TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_HUB_DEVICE, "%!FUNC! DeviceId: %ws", deviceId);
 
+    // Expected format:
+    //      USB\VID_89ab&PID_fedc
+    // or
+    //      USB\VID_89ab&PID_fedc&REV_789a
+    //
+    // Which results in a vidPid of 89ab:fedc (i.e., the numbers are hexadecimal).
+
+    if (wcslen(deviceId) < 21 || _wcsnicmp(deviceId, L"USB\\VID_", 8) != 0 || _wcsnicmp(deviceId + 12, L"&PID_", 5) != 0) {  // DevSkim: ignore DS154189
+        TraceEvents(TRACE_LEVEL_ERROR, TRACE_HUB_DEVICE, "%!FUNC! DeviceId string is not in expected format");
+        ExFreePool(deviceId);
+        WdfObjectDelete(request);
+        WdfObjectDelete(ioTarget);
+        return STATUS_INVALID_DEVICE_REQUEST;
+    }
+
+    USHORT vid;
+    status = ParseHexadecimal(deviceId + 8, 4, &vid);
+    if (!NT_SUCCESS(status)) {
+        TraceEvents(TRACE_LEVEL_ERROR, TRACE_HUB_DEVICE, "%!FUNC! ParseHexadecimal for VID failed %!STATUS!", status);
+        ExFreePool(deviceId);
+        WdfObjectDelete(request);
+        WdfObjectDelete(ioTarget);
+        return status;
+    }
+
+    USHORT pid;
+    status = ParseHexadecimal(deviceId + 17, 4, &pid);
+    if (!NT_SUCCESS(status)) {
+        TraceEvents(TRACE_LEVEL_ERROR, TRACE_HUB_DEVICE, "%!FUNC! ParseHexadecimal for PID failed %!STATUS!", status);
+        ExFreePool(deviceId);
+        WdfObjectDelete(request);
+        WdfObjectDelete(ioTarget);
+        return status;
+    }
+
+    TraceEvents(TRACE_LEVEL_VERBOSE, TRACE_HUB_DEVICE, "%!FUNC! VID: %04x, PID: %04x", vid, pid);
+
+    vidPid->Vid = vid;
+    vidPid->Pid = pid;
+
     ExFreePool(deviceId);
+    WdfObjectDelete(request);
+    WdfObjectDelete(ioTarget);
+
+    return STATUS_SUCCESS;
+}
+
+
+/// <summary>
+/// Sets busId to 0-0 on failure.
+/// </summary>
+static NTSTATUS GetBusId(WDFDEVICE Device, PDEVICE_OBJECT pdo, _Out_ PBUS_ID busId);
+#pragma alloc_text(PAGE, GetBusId)
+_Use_decl_annotations_
+static NTSTATUS GetBusId(WDFDEVICE Device, PDEVICE_OBJECT pdo, PBUS_ID busId) {
+    PAGED_CODE();
+
+    TraceEvents(TRACE_LEVEL_VERBOSE, TRACE_HUB_DEVICE, "%!FUNC! Entry");
+
+    if (busId == NULL) {
+        TraceEvents(TRACE_LEVEL_ERROR, TRACE_HUB_DEVICE, "%!FUNC! busId is NULL");
+        return STATUS_INVALID_PARAMETER;
+    }
+    busId->HubId = 0;
+    busId->PortId = 0;
+
+    WDFIOTARGET ioTarget;
+    NTSTATUS status = WdfIoTargetCreate(Device, WDF_NO_OBJECT_ATTRIBUTES, &ioTarget);
+    if (!NT_SUCCESS(status)) {
+        TraceEvents(TRACE_LEVEL_ERROR, TRACE_HUB_DEVICE, "%!FUNC! WdfIoTargetCreate %!STATUS!", status);
+        return status;
+    }
+
+    WDF_IO_TARGET_OPEN_PARAMS openParameters;
+    WDF_IO_TARGET_OPEN_PARAMS_INIT_EXISTING_DEVICE(&openParameters, pdo);
+    status = WdfIoTargetOpen(ioTarget, &openParameters);
+    if (!NT_SUCCESS(status)) {
+        TraceEvents(TRACE_LEVEL_ERROR, TRACE_HUB_DEVICE, "%!FUNC! WdfIoTargetOpen %!STATUS!", status);
+        WdfObjectDelete(ioTarget);
+        return status;
+    }
+
+    WDFREQUEST request;
+    status = WdfRequestCreate(WDF_NO_OBJECT_ATTRIBUTES, ioTarget, &request);
+    if (!NT_SUCCESS(status)) {
+        TraceEvents(TRACE_LEVEL_ERROR, TRACE_HUB_DEVICE, "%!FUNC! WdfRequestCreate %!STATUS!", status);
+        WdfObjectDelete(ioTarget);
+        return status;
+    }
+
+    WDF_REQUEST_REUSE_PARAMS reuseParameters;
+    WDF_REQUEST_REUSE_PARAMS_INIT(&reuseParameters, WDF_REQUEST_REUSE_NO_FLAGS, STATUS_NOT_SUPPORTED);
+    status = WdfRequestReuse(request, &reuseParameters);
+    if (!NT_SUCCESS(status)) {
+        TraceEvents(TRACE_LEVEL_ERROR, TRACE_HUB_DEVICE, "%!FUNC! WdfRequestReuse %!STATUS!", status);
+        WdfObjectDelete(request);
+        WdfObjectDelete(ioTarget);
+        return status;
+    }
+
+    IO_STACK_LOCATION stackLocation;
+    RtlZeroMemory(&stackLocation, sizeof(IO_STACK_LOCATION));
+    stackLocation.MajorFunction = IRP_MJ_PNP;
+    stackLocation.MinorFunction = IRP_MN_QUERY_DEVICE_TEXT;
+    stackLocation.Parameters.QueryDeviceText.DeviceTextType = DeviceTextLocationInformation;
+    stackLocation.Parameters.QueryDeviceText.LocaleId = MAKELCID(MAKELANGID(LANG_ENGLISH, SUBLANG_ENGLISH_US), SORT_DEFAULT);
+    WdfRequestWdmFormatUsingStackLocation(request, &stackLocation);
+
+    WDF_REQUEST_SEND_OPTIONS sendOptions;
+    WDF_REQUEST_SEND_OPTIONS_INIT(&sendOptions, WDF_REQUEST_SEND_OPTION_SYNCHRONOUS);
+    (void)WdfRequestSend(request, ioTarget, &sendOptions);
+    status = WdfRequestGetStatus(request);
+    if (!NT_SUCCESS(status)) {
+        TraceEvents(TRACE_LEVEL_ERROR, TRACE_HUB_DEVICE, "%!FUNC! WdfRequestGetStatus %!STATUS!", status);
+        WdfObjectDelete(request);
+        WdfObjectDelete(ioTarget);
+        return status;
+    }
+
+    PWCHAR location = (PWCHAR)WdfRequestGetInformation(request);
+    if (location == NULL) {
+        TraceEvents(TRACE_LEVEL_ERROR, TRACE_HUB_DEVICE, "%!FUNC! Location is NULL");
+        WdfObjectDelete(request);
+        WdfObjectDelete(ioTarget);
+        return STATUS_INVALID_DEVICE_REQUEST;
+    }
+
+    TraceEvents(TRACE_LEVEL_VERBOSE, TRACE_HUB_DEVICE, "%!FUNC! Location: %ws", location);
+
+    // Expected format:
+    //      Port_#0013.Hub_#0021
+    //
+    // Which results in a busId of 21-13 (i.e., the numbers are decimal).
+
+    if (wcslen(location) != 20 || wcsncmp(location, L"Port_#", 6) != 0 || wcsncmp(location + 10, L".Hub_#", 6) != 0) {  // DevSkim: ignore DS154189
+        TraceEvents(TRACE_LEVEL_ERROR, TRACE_HUB_DEVICE, "%!FUNC! Location string is not in expected format");
+        ExFreePool(location);
+        WdfObjectDelete(request);
+        WdfObjectDelete(ioTarget);
+        return STATUS_INVALID_DEVICE_REQUEST;
+    }
+
+    USHORT hubId;
+    status = ParseDecimal(location + 16, 4, &hubId);
+    if (!NT_SUCCESS(status)) {
+        TraceEvents(TRACE_LEVEL_ERROR, TRACE_HUB_DEVICE, "%!FUNC! ParseDecimal for hub number failed %!STATUS!", status);
+        ExFreePool(location);
+        WdfObjectDelete(request);
+        WdfObjectDelete(ioTarget);
+        return status;
+    }
+
+    USHORT portId;
+    status = ParseDecimal(location + 6, 4, &portId);
+    if (!NT_SUCCESS(status)) {
+        TraceEvents(TRACE_LEVEL_ERROR, TRACE_HUB_DEVICE, "%!FUNC! ParseDecimal for port number failed %!STATUS!", status);
+        ExFreePool(location);
+        WdfObjectDelete(request);
+        WdfObjectDelete(ioTarget);
+        return status;
+    }
+
+    TraceEvents(TRACE_LEVEL_VERBOSE, TRACE_HUB_DEVICE, "%!FUNC! HubId: %lu, PortId: %lu", (ULONG)hubId, (ULONG)portId);
+
+    if (hubId == 0 || hubId > 99 || portId == 0 || portId > 99) {
+        TraceEvents(TRACE_LEVEL_ERROR, TRACE_HUB_DEVICE, "%!FUNC! HubId or PortId out of range");
+        ExFreePool(location);
+        WdfObjectDelete(request);
+        WdfObjectDelete(ioTarget);
+        return STATUS_INVALID_DEVICE_REQUEST;
+    }
+
+    busId->HubId = (USHORT)hubId;
+    busId->PortId = (USHORT)portId;
+
+    ExFreePool(location);
     WdfObjectDelete(request);
     WdfObjectDelete(ioTarget);
 
@@ -190,7 +435,12 @@ static VOID EvtWorkItemCallback(WDFWORKITEM WorkItem) {
         PDEVICE_OBJECT pdo = relations->Objects[i];
         if (pdo != NULL) {
             TraceEvents(TRACE_LEVEL_VERBOSE, TRACE_HUB_DEVICE, "%!FUNC! found child PDO at index %u: %p", i, pdo);
-            (void)SendSynchronousQueryId(device, pdo);
+            VID_PID vidPid;
+            (void)GetVidPid(device, pdo, &vidPid);
+            BUS_ID busId;
+            (void)GetBusId(device, pdo, &busId);
+            TraceEvents(TRACE_LEVEL_VERBOSE, TRACE_HUB_DEVICE, "%!FUNC! found child PDO at index %u: %p, VidPid = %04x:%04x, BusId = %lu-%lu",
+                i, pdo, vidPid.Vid, vidPid.Pid, (ULONG)busId.HubId, (ULONG)busId.PortId);
             (void)AddChildToCollection(driver, pdo);
         }
     }
