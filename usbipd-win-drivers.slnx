@@ -24,6 +24,7 @@ SPDX-License-Identifier: GPL-3.0-only
     <File Path="c/dependabot.csproj" />
     <File Path="c/Directory.Build.props" />
     <File Path="c/WDK.Build.props" />
+    <File Path="c/windows-attestation.ddf" />
   </Folder>
   <Folder Name="/Solution Items/csharp/">
     <File Path="csharp/Directory.Build.props" />
