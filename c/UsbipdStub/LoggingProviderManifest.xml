@@ -1,0 +1,27 @@
+<!--
+SPDX-FileCopyrightText: 2026 Frans van Dorsselaer
+
+SPDX-License-Identifier: GPL-3.0-only
+-->
+<!-- DevSkim: ignore DS137138 -->
+<instrumentationManifest xmlns="http://schemas.microsoft.com/win/2004/08/events">
+    <instrumentation>
+        <events>
+            <provider
+                name="UsbipdStub"
+                guid="{FEFAD98F-FC36-4BFC-9341-C4429C8CDD8C}"
+                resourceFileName="UsbipdStub.sys"
+                messageFileName="UsbipdStub.sys"
+                symbol="LOG_PROVIDER"
+                >
+                <channels>
+                    <channel
+                        name="usbipd-win/UsbipdStub/Operational"
+                        type="Operational"
+                        symbol="LOG_CHANNEL"
+                        />
+                </channels>
+            </provider>
+        </events>
+    </instrumentation>
+</instrumentationManifest>

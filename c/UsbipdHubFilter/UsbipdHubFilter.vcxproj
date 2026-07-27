@@ -29,6 +29,7 @@ SPDX-License-Identifier: GPL-3.0-only
     <ClCompile Include="control_queue.c" />
     <ClCompile Include="hub_device.c" />
     <ClCompile Include="driver.c" />
+    <ClCompile Include="log.c" />
     <ClCompile Include="stdafx.c">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|ARM64'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|ARM64'">Create</PrecompiledHeader>
@@ -42,6 +43,7 @@ SPDX-License-Identifier: GPL-3.0-only
     <ClInclude Include="control_queue.h" />
     <ClInclude Include="hub_device.h" />
     <ClInclude Include="driver.h" />
+    <ClInclude Include="log.h" />
     <ClInclude Include="public.h" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="trace.h" />
@@ -143,9 +145,9 @@ SPDX-License-Identifier: GPL-3.0-only
       <WppScanConfigurationData Condition="'%(ClCompile.ScanConfigurationData)' == ''">trace.h</WppScanConfigurationData>
       <WppKernelMode>true</WppKernelMode>
       <PrecompiledHeader>Use</PrecompiledHeader>
-      <LanguageStandard_C>stdc17</LanguageStandard_C>
       <ConformanceMode>true</ConformanceMode>
       <CompileAs>CompileAsC</CompileAs>
+      <LanguageStandard_C>stdclatest</LanguageStandard_C>
     </ClCompile>
     <DriverSign>
       <FileDigestAlgorithm>sha256</FileDigestAlgorithm>
@@ -169,9 +171,9 @@ SPDX-License-Identifier: GPL-3.0-only
       <WppScanConfigurationData Condition="'%(ClCompile.ScanConfigurationData)' == ''">trace.h</WppScanConfigurationData>
       <WppKernelMode>true</WppKernelMode>
       <PrecompiledHeader>Use</PrecompiledHeader>
-      <LanguageStandard_C>stdc17</LanguageStandard_C>
       <ConformanceMode>true</ConformanceMode>
       <CompileAs>CompileAsC</CompileAs>
+      <LanguageStandard_C>stdclatest</LanguageStandard_C>
     </ClCompile>
     <DriverSign>
       <FileDigestAlgorithm>sha256</FileDigestAlgorithm>
@@ -197,9 +199,9 @@ SPDX-License-Identifier: GPL-3.0-only
       <WppScanConfigurationData Condition="'%(ClCompile.ScanConfigurationData)' == ''">trace.h</WppScanConfigurationData>
       <WppKernelMode>true</WppKernelMode>
       <PrecompiledHeader>Use</PrecompiledHeader>
-      <LanguageStandard_C>stdc17</LanguageStandard_C>
       <ConformanceMode>true</ConformanceMode>
       <CompileAs>CompileAsC</CompileAs>
+      <LanguageStandard_C>stdclatest</LanguageStandard_C>
     </ClCompile>
     <DriverSign>
       <FileDigestAlgorithm>sha256</FileDigestAlgorithm>
@@ -225,9 +227,9 @@ SPDX-License-Identifier: GPL-3.0-only
       <WppScanConfigurationData Condition="'%(ClCompile.ScanConfigurationData)' == ''">trace.h</WppScanConfigurationData>
       <WppKernelMode>true</WppKernelMode>
       <PrecompiledHeader>Use</PrecompiledHeader>
-      <LanguageStandard_C>stdc17</LanguageStandard_C>
       <ConformanceMode>true</ConformanceMode>
       <CompileAs>CompileAsC</CompileAs>
+      <LanguageStandard_C>stdclatest</LanguageStandard_C>
     </ClCompile>
     <DriverSign>
       <FileDigestAlgorithm>sha256</FileDigestAlgorithm>
@@ -249,9 +251,13 @@ SPDX-License-Identifier: GPL-3.0-only
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="generated\version.rc" />
+    <ResourceCompile Include="$(IntDir)LoggingProviderManifest.rc" />
   </ItemGroup>
   <ItemGroup>
     <None Include="cpp.hint" />
+  </ItemGroup>
+  <ItemGroup>
+    <MessageCompile Include="LoggingProviderManifest.xml" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
 </Project>

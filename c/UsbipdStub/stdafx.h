@@ -9,6 +9,7 @@
 
 #include <guiddef.h>
 #include <ntddk.h>
+#include <TraceLoggingProvider.h>
 #include <usb.h>
 #include <usbdlib.h>
 #include <wdf.h>

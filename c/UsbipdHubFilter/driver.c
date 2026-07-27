@@ -8,19 +8,20 @@
 #include "trace.h"
 #include "driver.tmh"
 
-#include "hub_device.h"
 #include "child_device.h"
+#include "hub_device.h"
+#include "log.h"
 
 
 static EVT_WDF_OBJECT_CONTEXT_CLEANUP DriverContextCleanup;
 #pragma alloc_text(PAGE, DriverContextCleanup)
 _Use_decl_annotations_
 static void DriverContextCleanup(WDFOBJECT DriverObject) {
-    UNREFERENCED_PARAMETER(DriverObject);
     PAGED_CODE();
 
     TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_DRIVER, "%!FUNC! Entry");
 
+    TraceLoggingUnregister(g_LoggingProvider);
     WPP_CLEANUP(WdfDriverWdmGetDriverObject((WDFDRIVER)DriverObject));
 }
 
@@ -106,7 +107,18 @@ NTSTATUS DriverEntry(PDRIVER_OBJECT DriverObject, PUNICODE_STRING RegistryPath) 
     TraceEvents(TRACE_LEVEL_INFORMATION, TRACE_DRIVER, "%!FUNC! Entry");
 
     //
-    // We need a cleanup callback for WPP_CLEANUP during driver unload.
+    // Initialize TraceLogging
+    //
+    NTSTATUS status = TraceLoggingRegister(g_LoggingProvider);
+    if (!NT_SUCCESS(status)) {
+        TraceEvents(TRACE_LEVEL_ERROR, TRACE_DRIVER, "TraceLoggingRegister failed %!STATUS!", status);
+        // As per documentation, we should not fail the driver entry if TraceLoggingRegister fails.
+    }
+
+    LogEvent(TRACE_LEVEL_INFORMATION, "Startup");
+
+    //
+    // We need a cleanup callback for TraceLoggingUnregister and WPP_CLEANUP during driver unload.
     //
     WDF_OBJECT_ATTRIBUTES driverAttributes;
     WDF_OBJECT_ATTRIBUTES_INIT_CONTEXT_TYPE(&driverAttributes, DRIVER_CONTEXT);
@@ -117,9 +129,10 @@ NTSTATUS DriverEntry(PDRIVER_OBJECT DriverObject, PUNICODE_STRING RegistryPath) 
     config.DriverPoolTag = POOL_TAG;
 
     WDFDRIVER driver;
-    NTSTATUS status = WdfDriverCreate(DriverObject, RegistryPath, &driverAttributes, &config, &driver);
+    status = WdfDriverCreate(DriverObject, RegistryPath, &driverAttributes, &config, &driver);
     if (!NT_SUCCESS(status)) {
         TraceEvents(TRACE_LEVEL_ERROR, TRACE_DRIVER, "WdfDriverCreate failed %!STATUS!", status);
+        TraceLoggingUnregister(g_LoggingProvider);
         WPP_CLEANUP(DriverObject);
         return status;
     }

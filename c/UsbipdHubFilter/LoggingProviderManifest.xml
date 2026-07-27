@@ -1,0 +1,27 @@
+<!--
+SPDX-FileCopyrightText: 2026 Frans van Dorsselaer
+
+SPDX-License-Identifier: GPL-3.0-only
+-->
+<!-- DevSkim: ignore DS137138 -->
+<instrumentationManifest xmlns="http://schemas.microsoft.com/win/2004/08/events">
+    <instrumentation>
+        <events>
+            <provider
+                name="UsbipdHubFilter"
+                guid="{47EA55DC-8F39-42A0-AE78-051B84C31175}"
+                resourceFileName="UsbipdHubFilter.sys"
+                messageFileName="UsbipdHubFilter.sys"
+                symbol="LOG_PROVIDER"
+                >
+                <channels>
+                    <channel
+                        name="usbipd-win/UsbipdHubFilter/Operational"
+                        type="Operational"
+                        symbol="LOG_CHANNEL"
+                        />
+                </channels>
+            </provider>
+        </events>
+    </instrumentation>
+</instrumentationManifest>
