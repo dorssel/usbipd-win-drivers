@@ -11,10 +11,10 @@ PnpLockDown = 1
 DefaultDestDir = 13
 
 [SourceDisksNames]
-1 = %DiskName%,,,""
+1 = %DiskName%
 
 [SourceDisksFiles]
-UsbipdStub.sys = 1,,
+UsbipdStub.sys = 1
 
 [Manufacturer]
 %ManufacturerName% = Standard,nt$ARCH$.10.0...17763
@@ -35,7 +35,7 @@ AddReg = UsbipdStub_Install_AddReg
 HKR,,FriendlyName,,%DeviceDescription%
 
 [UsbipdStub_Install.nt$ARCH$.Services]
-AddService = UsbipdStub,%SPSVCINST_ASSOCSERVICE%,UsbipdStub_Install_Service
+AddService = UsbipdStub,2,UsbipdStub_Install_Service ; SPSVCINST_ASSOCSERVICE
 
 [UsbipdStub_Install_Service]
 DisplayName    = %ServiceDescription%
@@ -50,8 +50,15 @@ KmdfService = UsbipdStub,UsbipdStub_Install_Wdf
 [UsbipdStub_Install_Wdf]
 KmdfLibraryVersion = $KMDFVERSION$
 
+[UsbipdStub_Install.nt$ARCH$.Events]
+AddEventProvider = {FEFAD98F-FC36-4BFC-9341-C4429C8CDD8C},UsbipdStub_Provider
+
+[UsbipdStub_Provider]
+ProviderName = UsbipdStub
+ResourceFile = %13%\UsbipdStub.sys
+AddChannel   = usbipd-win/UsbipdStub/Operational, 2 ; Operational
+
 [Strings]
-SPSVCINST_ASSOCSERVICE = 0x00000002
 ManufacturerName = "Frans van Dorsselaer"
 DiskName = "USB/IP Stub Installation Disk"
 DeviceDescription = "USB/IP Shared Device"

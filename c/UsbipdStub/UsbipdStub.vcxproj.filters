@@ -22,6 +22,10 @@ SPDX-License-Identifier: GPL-3.0-only
       <UniqueIdentifier>{8E41214B-6785-4CFE-B992-037D68949A14}</UniqueIdentifier>
       <Extensions>inf;inv;inx;mof;mc;</Extensions>
     </Filter>
+    <Filter Include="Generated Files">
+      <UniqueIdentifier>{29937b48-c974-4693-a1a0-0c1726cda450}</UniqueIdentifier>
+      <SourceControlFiles>False</SourceControlFiles>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <Inf Include="UsbipdStub.inf">
@@ -47,6 +51,9 @@ SPDX-License-Identifier: GPL-3.0-only
     <ClInclude Include="stdafx.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="log.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="device.c">
@@ -64,13 +71,24 @@ SPDX-License-Identifier: GPL-3.0-only
     <ClCompile Include="guids.c">
       <Filter>Source Files</Filter>
     </ClCompile>
-  </ItemGroup>
-  <ItemGroup>
-    <ResourceCompile Include="generated\version.rc">
-      <Filter>Resource Files</Filter>
-    </ResourceCompile>
+    <ClCompile Include="log.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="cpp.hint" />
+  </ItemGroup>
+  <ItemGroup>
+    <MessageCompile Include="LoggingProviderManifest.xml">
+      <Filter>Resource Files</Filter>
+    </MessageCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="generated\version.rc">
+      <Filter>Generated Files</Filter>
+    </ResourceCompile>
+    <ResourceCompile Include="$(IntDir)LoggingProviderManifest.rc">
+      <Filter>Generated Files</Filter>
+    </ResourceCompile>
   </ItemGroup>
 </Project>

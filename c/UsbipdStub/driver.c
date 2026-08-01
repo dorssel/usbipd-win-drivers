@@ -9,17 +9,18 @@
 #include "driver.tmh"
 
 #include "device.h"
+#include "log.h"
 
 
 static EVT_WDF_OBJECT_CONTEXT_CLEANUP DriverContextCleanup;
 #pragma alloc_text(PAGE, DriverContextCleanup)
 _Use_decl_annotations_
 static void DriverContextCleanup(WDFOBJECT DriverObject) {
-    UNREFERENCED_PARAMETER(DriverObject);
     PAGED_CODE();
 
     TraceEvents(TRACE_LEVEL_VERBOSE, TRACE_DRIVER, "%!FUNC! Entry");
 
+    TraceLoggingUnregister(g_LoggingProvider);
     WPP_CLEANUP(WdfDriverWdmGetDriverObject((WDFDRIVER)DriverObject));
 }
 
@@ -43,7 +44,18 @@ NTSTATUS DriverEntry(PDRIVER_OBJECT DriverObject, PUNICODE_STRING RegistryPath) 
     TraceEvents(TRACE_LEVEL_VERBOSE, TRACE_DRIVER, "%!FUNC! Entry");
 
     //
-    // We need a cleanup callback for WPP_CLEANUP during driver unload.
+    // Initialize TraceLogging
+    //
+    NTSTATUS status = TraceLoggingRegister(g_LoggingProvider);
+    if (!NT_SUCCESS(status)) {
+        TraceEvents(TRACE_LEVEL_ERROR, TRACE_DRIVER, "TraceLoggingRegister failed %!STATUS!", status);
+        // As per documentation, we should not fail the driver entry if TraceLoggingRegister fails.
+    }
+
+    LogEvent(TRACE_LEVEL_INFORMATION, "Startup");
+
+    //
+    // We need a cleanup callback for TraceLoggingUnregister and WPP_CLEANUP during driver unload.
     //
     WDF_OBJECT_ATTRIBUTES attributes;
     WDF_OBJECT_ATTRIBUTES_INIT(&attributes);
@@ -52,10 +64,11 @@ NTSTATUS DriverEntry(PDRIVER_OBJECT DriverObject, PUNICODE_STRING RegistryPath) 
     WDF_DRIVER_CONFIG config;
     WDF_DRIVER_CONFIG_INIT(&config, StubCreateDevice);
 
-    NTSTATUS status = WdfDriverCreate(DriverObject, RegistryPath, &attributes, &config, WDF_NO_HANDLE);
+    status = WdfDriverCreate(DriverObject, RegistryPath, &attributes, &config, WDF_NO_HANDLE);
 
     if (!NT_SUCCESS(status)) {
         TraceEvents(TRACE_LEVEL_ERROR, TRACE_DRIVER, "WdfDriverCreate failed %!STATUS!", status);
+        TraceLoggingUnregister(g_LoggingProvider);
         WPP_CLEANUP(DriverObject);
         return status;
     }

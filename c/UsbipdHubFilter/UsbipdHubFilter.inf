@@ -12,10 +12,10 @@ PnpLockdown = 1
 DefaultDestDir = 13
 
 [SourceDisksNames]
-1 = %DiskName%,,,""
+1 = %DiskName%
 
 [SourceDisksFiles]
-UsbipdHubFilter.sys = 1,,
+UsbipdHubFilter.sys = 1
 
 [Manufacturer]
 %ManufacturerName% = UsbipdHubFilter,nt$ARCH$.10.0...18362,nt$ARCH$.10.0...17763
@@ -23,7 +23,7 @@ UsbipdHubFilter.sys = 1,,
 [UsbipdHubFilter.nt$ARCH$.10.0...18362]
 %DeviceDescription% = UsbipdHubFilter_Install,USB\VID_0409&PID_005A&REV_0100
 
-; NOTE: Windows 1809 does not support AddFilter
+; NOTE: Windows 1809 does not support AddFilter, but it does support AddEventProvider
 
 [UsbipdHubFilter.nt$ARCH$.10.0...17763]
 %DeviceDescription% = UsbipdHubFilter_InstallLegacy,USB\VID_0409&PID_005A&REV_0100
@@ -44,11 +44,11 @@ AddService = UsbipdHubFilter,,UsbipdHubFilter_Install_Service
 AddService = UsbipdHubFilter,,UsbipdHubFilter_Install_Service
 
 [UsbipdHubFilter_Install_Service]
-DisplayName    = %ServiceDescription%
-ServiceType    = 1 ; SERVICE_KERNEL_DRIVER
-StartType      = 3 ; SERVICE_DEMAND_START
-ErrorControl   = 1 ; SERVICE_ERROR_NORMAL
-ServiceBinary  = %13%\UsbipdHubFilter.sys
+DisplayName   = %ServiceDescription%
+ServiceType   = 1 ; SERVICE_KERNEL_DRIVER
+StartType     = 3 ; SERVICE_DEMAND_START
+ErrorControl  = 1 ; SERVICE_ERROR_NORMAL
+ServiceBinary = %13%\UsbipdHubFilter.sys
 
 [UsbipdHubFilter_Install.nt$ARCH$.Wdf]
 KmdfService = UsbipdHubFilter,UsbipdHubFilter_Install_Wdf
@@ -60,19 +60,30 @@ KmdfService = UsbipdHubFilter,UsbipdHubFilter_Install_Wdf
 KmdfLibraryVersion = $KMDFVERSION$
 
 [UsbipdHubFilter_Install.nt$ARCH$.Filters]
-AddFilter=UsbipdHubFilter,0,UsbipdHubFilter_Install_Filter
+AddFilter = UsbipdHubFilter,0,UsbipdHubFilter_Install_Filter
 
 [UsbipdHubFilter_Install_Filter]
-FilterPosition=Upper
+FilterPosition = Upper
 
 [UsbipdHubFilter_InstallLegacy.nt$ARCH$.HW]
-AddReg=UsbipdHubFilter_InstallLegacy_Filter
+AddReg = UsbipdHubFilter_InstallLegacy_Filter
 
 [UsbipdHubFilter_InstallLegacy_Filter]
-HKR,,"UpperFilters",0x00010008,"UsbipdHubFilter"
+HKR,,UpperFilters,0x00010008,UsbipdHubFilter ; FLG_ADDREG_TYPE_MULTI_SZ | FLG_ADDREG_APPEND
+
+[UsbipdHubFilter_Install.nt$ARCH$.Events]
+AddEventProvider = {47EA55DC-8F39-42A0-AE78-051B84C31175},UsbipdHubFilter_Provider
+
+[UsbipdHubFilter_InstallLegacy.nt$ARCH$.Events]
+AddEventProvider = {47EA55DC-8F39-42A0-AE78-051B84C31175},UsbipdHubFilter_Provider
+
+[UsbipdHubFilter_Provider]
+ProviderName = UsbipdHubFilter
+ResourceFile = %13%\UsbipdHubFilter.sys
+AddChannel   = usbipd-win/UsbipdHubFilter/Operational, 2 ; Operational
 
 [Strings]
-ManufacturerName = "Frans van Dorsselaer"
-DiskName = "USB/IP Hub Filter Installation Disk"
-DeviceDescription = "USB/IP Hub Filter Device"
+ManufacturerName   = "Frans van Dorsselaer"
+DiskName           = "USB/IP Hub Filter Installation Disk"
+DeviceDescription  = "USB/IP Hub Filter Device"
 ServiceDescription = "USB/IP Hub Filter Service"
