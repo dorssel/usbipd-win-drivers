@@ -8,7 +8,7 @@ SPDX-License-Identifier: GPL-3.0-only
   <ItemGroup>
     <!-- csharp -->
     <PackageVersion Include="GitVersion.MsBuild" Version="6.8.2" />
-    <PackageVersion Include="Microsoft.Windows.CsWin32" Version="0.3.330" />
+    <PackageVersion Include="Microsoft.Windows.CsWin32" Version="0.3.333" />
     <PackageVersion Include="System.CodeDom" Version="10.0.11" />
     <!-- c -->
     <PackageVersion Include="Microsoft.Windows.SDK.CPP" Version="10.0.28000.2705" />
