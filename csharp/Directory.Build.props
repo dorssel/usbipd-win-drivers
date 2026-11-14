@@ -10,9 +10,9 @@ SPDX-License-Identifier: GPL-3.0-only
 
   <PropertyGroup>
     <!-- Use the latest .NET SDK -->
-    <TargetFramework>net10.0</TargetFramework>
+    <TargetFramework>$(MainTargetFramework)</TargetFramework>
     <!-- Use the latest C# language standard -->
-    <LangVersion>14.0</LangVersion>
+    <LangVersion>15.0</LangVersion>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
 
