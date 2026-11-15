@@ -10,6 +10,9 @@ SPDX-License-Identifier: GPL-3.0-only
     <ContinuousIntegrationBuild Condition="'$(GITHUB_ACTIONS)' == 'true'">true</ContinuousIntegrationBuild>
     <ContinuousIntegrationBuild Condition="'$(ContinuousIntegrationBuild)' != 'true'">false</ContinuousIntegrationBuild>
 
+    <!-- Use the latest .NET SDK -->
+    <MainTargetFramework>net11.0</MainTargetFramework>
+
     <!-- Be very strict -->
     <NuGetAudit>true</NuGetAudit>
     <NuGetAuditLevel>low</NuGetAuditLevel>
