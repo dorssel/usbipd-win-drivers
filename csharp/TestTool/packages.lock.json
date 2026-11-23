@@ -4,9 +4,9 @@
     "net11.0-windows10.0.17763": {
       "GitVersion.MsBuild": {
         "type": "Direct",
-        "requested": "[6.8.2, )",
-        "resolved": "6.8.2",
-        "contentHash": "eTd8jUiogUXpVssFyDWWdMrPr5Cdc57tWaQ3Cv/eMIhnumOHZhDkc/wcy8hYU8aH7NS4VT2w/pHjVITDSTXMGw=="
+        "requested": "[7.0.1, )",
+        "resolved": "7.0.1",
+        "contentHash": "Xp+fXvsAvGKJpwKIqi4U0OObiK0O9JigsMSPIAbGIPUpmPls6nQKEeZZyJNe9dpYRDr8QOSAs9vYdVoDCG46RQ=="
       },
       "Microsoft.Windows.CsWin32": {
         "type": "Direct",
